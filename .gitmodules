@@ -1,0 +1,3 @@
+[submodule "roboy_fpga_code"]
+	path = roboy_fpga_code
+	url = https://github.com/Roboy/roboy_fpga_code

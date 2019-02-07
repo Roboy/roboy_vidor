@@ -121,52 +121,64 @@ module MKRVIDOR4000_top
 
 // signal declaration
 
-wire        wOSC_CLK;
+//wire        wOSC_CLK;
+//
+//wire        wCLK8,wCLK24, wCLK64, wCLK120;
+//
+//wire [31:0] wJTAG_ADDRESS, wJTAG_READ_DATA, wJTAG_WRITE_DATA, wDPRAM_READ_DATA;
+//wire        wJTAG_READ, wJTAG_WRITE, wJTAG_WAIT_REQUEST, wJTAG_READ_DATAVALID;
+//wire [4:0]  wJTAG_BURST_COUNT;
+//wire        wDPRAM_CS;
+//
+//wire [7:0]  wDVI_RED,wDVI_GRN,wDVI_BLU;
+//wire        wDVI_HS, wDVI_VS, wDVI_DE;
+//
+//wire        wVID_CLK, wVID_CLKx5;
+//wire        wMEM_CLK;
+//
+//assign wVID_CLK   = wCLK24;
+//assign wVID_CLKx5 = wCLK120;
+//assign wCLK8      = iCLK;
 
-wire        wCLK8,wCLK24, wCLK64, wCLK120;
+//// internal oscillator
+//cyclone10lp_oscillator   osc
+//  ( 
+//  .clkout(wOSC_CLK),
+//  .oscena(1'b1));
+//
+//// system PLL
+//SYSTEM_PLL PLL_inst(
+//  .areset(1'b0),
+//  .inclk0(wCLK8),
+//  .c0(wCLK24),
+//  .c1(wCLK120),
+//  .c2(wMEM_CLK),
+//   .c3(oSDRAM_CLK),
+//  .c4(wFLASH_CLK),
+//   
+//  .locked()
+//  );
+  
 
-wire [31:0] wJTAG_ADDRESS, wJTAG_READ_DATA, wJTAG_WRITE_DATA, wDPRAM_READ_DATA;
-wire        wJTAG_READ, wJTAG_WRITE, wJTAG_WAIT_REQUEST, wJTAG_READ_DATAVALID;
-wire [4:0]  wJTAG_BURST_COUNT;
-wire        wDPRAM_CS;
+  forearm_control(
+.clk_clk(iCLK),                                       //                      clk.clk
+.myocontrol_0_conduit_end_miso(bPEX_PIN6),                 // myocontrol_0_conduit_end.miso
+.myocontrol_0_conduit_end_mosi(bPEX_PIN8),                 //                         .mosi
+.myocontrol_0_conduit_end_sck(bPEX_PIN10),                  //                         .sck
+.myocontrol_0_conduit_end_ss_n({iPEX_PIN11,iPEX_PIN12,iPEX_PIN13}),                 //                         .ss_n
+.myocontrol_0_conduit_end_mirrored_muscle_unit(1'b0), //                         .mirrored_muscle_unit
+.myocontrol_0_conduit_end_power_sense_n(1'b0),        //                         .power_sense_n
+.reset_reset_n(1'b1)
+);
 
-wire [7:0]  wDVI_RED,wDVI_GRN,wDVI_BLU;
-wire        wDVI_HS, wDVI_VS, wDVI_DE;
-
-wire        wVID_CLK, wVID_CLKx5;
-wire        wMEM_CLK;
-
-assign wVID_CLK   = wCLK24;
-assign wVID_CLKx5 = wCLK120;
-assign wCLK8      = iCLK;
-
-// internal oscillator
-cyclone10lp_oscillator   osc
-  ( 
-  .clkout(wOSC_CLK),
-  .oscena(1'b1));
-
-// system PLL
-SYSTEM_PLL PLL_inst(
-  .areset(1'b0),
-  .inclk0(wCLK8),
-  .c0(wCLK24),
-  .c1(wCLK120),
-  .c2(wMEM_CLK),
-   .c3(oSDRAM_CLK),
-  .c4(wFLASH_CLK),
-   
-  .locked());
-
-
-reg [5:0] rRESETCNT;
-
-always @(posedge wMEM_CLK)
-begin
-  if (!rRESETCNT[5])
-  begin
-  rRESETCNT<=rRESETCNT+1;
-  end
-end
+//reg [5:0] rRESETCNT;
+//
+//always @(posedge wMEM_CLK)
+//begin
+//  if (!rRESETCNT[5])
+//  begin
+//  rRESETCNT<=rRESETCNT+1;
+//  end
+//end
 
 endmodule
