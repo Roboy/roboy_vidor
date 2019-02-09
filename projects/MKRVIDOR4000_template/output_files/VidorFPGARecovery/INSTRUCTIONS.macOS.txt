@@ -1,0 +1,33 @@
+Vidor Recovery Instructions
+---------------------------
+
+1) Download VidorFPGARecovery and extract it.
+
+2) Open the Terminal app
+
+3) Change directory to the VidorFPGARecovery folder (where the archive is extracted) with the command:
+
+cd /path/to/VidorFPGARecovery
+
+The path can be easily determined by drag and dropping the VidorFPGAFolder inside the terminal window, this action will enter the complete path of the folder for you automatically. So, briefly, just type "cd " and drag&drop the VidorFPGAFolder inside the command prompt window.
+
+4) Plug MKR Vidor 4000 in and double-tap reset button quickly
+
+5) Determine the serial port of the MKR Vidor 4000, you will need to replace the <PORT> value in the commands below.
+You can use the Arduino IDE "Tools" -> "Port" menu to determine the port number. For, example if it's /dev/cu.usbmodem1411 replace <PORT> with cu.usbmodem1411
+
+6) Run:
+
+./tools/mac/bossac -i -d --port=<PORT> -I -U true -i -e -w -v clujtag-server.ino.bin -R
+
+7) Run:
+
+./tools/mac/clujtag -p /dev/<PORT> -s boot.svf
+
+NOTE: it will take almost a minute, please wait until the command completes before doing the next step
+
+8) Double-tap reset button quickly
+
+9) Run:
+
+./tools/mac/bossac -i -d --port=<PORT> -I -U true -i -e -w -v RestoreFPGABootloader.ino.bin -R

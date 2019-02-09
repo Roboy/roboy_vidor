@@ -119,66 +119,89 @@ module MKRVIDOR4000_top
 
 );
 
-// signal declaration
+parameter NUMBER_OF_MOTORS = 4;
 
-//wire        wOSC_CLK;
-//
-//wire        wCLK8,wCLK24, wCLK64, wCLK120;
-//
-//wire [31:0] wJTAG_ADDRESS, wJTAG_READ_DATA, wJTAG_WRITE_DATA, wDPRAM_READ_DATA;
-//wire        wJTAG_READ, wJTAG_WRITE, wJTAG_WAIT_REQUEST, wJTAG_READ_DATAVALID;
-//wire [4:0]  wJTAG_BURST_COUNT;
-//wire        wDPRAM_CS;
-//
-//wire [7:0]  wDVI_RED,wDVI_GRN,wDVI_BLU;
-//wire        wDVI_HS, wDVI_VS, wDVI_DE;
-//
-//wire        wVID_CLK, wVID_CLKx5;
-//wire        wMEM_CLK;
-//
-//assign wVID_CLK   = wCLK24;
-//assign wVID_CLKx5 = wCLK120;
-//assign wCLK8      = iCLK;
+wire [31:0] data_out;
+reg [10:0] counter;
 
-//// internal oscillator
-//cyclone10lp_oscillator   osc
-//  ( 
-//  .clkout(wOSC_CLK),
-//  .oscena(1'b1));
-//
-//// system PLL
-//SYSTEM_PLL PLL_inst(
-//  .areset(1'b0),
-//  .inclk0(wCLK8),
-//  .c0(wCLK24),
-//  .c1(wCLK120),
-//  .c2(wMEM_CLK),
-//   .c3(oSDRAM_CLK),
-//  .c4(wFLASH_CLK),
-//   
-//  .locked()
-//  );
-  
+reg [31:0] Kp[NUMBER_OF_MOTORS-1:0];
+reg [31:0] Ki[NUMBER_OF_MOTORS-1:0];
 
-  forearm_control(
-.clk_clk(iCLK),                                       //                      clk.clk
-.myocontrol_0_conduit_end_miso(bPEX_PIN6),                 // myocontrol_0_conduit_end.miso
-.myocontrol_0_conduit_end_mosi(bPEX_PIN8),                 //                         .mosi
-.myocontrol_0_conduit_end_sck(bPEX_PIN10),                  //                         .sck
-.myocontrol_0_conduit_end_ss_n({iPEX_PIN11,iPEX_PIN12,iPEX_PIN13}),                 //                         .ss_n
-.myocontrol_0_conduit_end_mirrored_muscle_unit(1'b0), //                         .mirrored_muscle_unit
-.myocontrol_0_conduit_end_power_sense_n(1'b0),        //                         .power_sense_n
-.reset_reset_n(1'b1)
+spi_slave (
+	.clk_i(iCLK),
+	.spi_sck_i(bMKR_D[9]),
+   .spi_ssel_i(iSAM_INT),
+   .spi_mosi_i(bMKR_D[8]),
+   .spi_miso_o(bMKR_D[10]),
+   .di_i(counter),
+   .wren_i(iSAM_INT),
+   .wr_ack_o(write_ack),
+   .do_valid_o(data_out_valid),
+   .do_o(data_out)
 );
 
-//reg [5:0] rRESETCNT;
-//
-//always @(posedge wMEM_CLK)
-//begin
-//  if (!rRESETCNT[5])
-//  begin
-//  rRESETCNT<=rRESETCNT+1;
-//  end
-//end
+always @(posedge iCLK) begin: SPICONTROL_SPILOGIC
+	
+	if(iSAM_INT==1) begin
+		counter <= counter +1;
+	end
+	if(data_out_valid) begin
+		case(data_out && 8'hff)
+			8'h00: Kp[data_out[7:0]][31:0] <= data_out[31:0];
+			8'h01: Ki[data_out[7:0]][31:0] <= data_out[31:0];
+		endcase
+	end
+end
+ 
+
+// signal declaration
+
+wire        wOSC_CLK;
+
+wire        wCLK8,wCLK24, wCLK64, wCLK120;
+
+wire [31:0] wJTAG_ADDRESS, wJTAG_READ_DATA, wJTAG_WRITE_DATA, wDPRAM_READ_DATA;
+wire        wJTAG_READ, wJTAG_WRITE, wJTAG_WAIT_REQUEST, wJTAG_READ_DATAVALID;
+wire [4:0]  wJTAG_BURST_COUNT;
+wire        wDPRAM_CS;
+
+wire [7:0]  wDVI_RED,wDVI_GRN,wDVI_BLU;
+wire        wDVI_HS, wDVI_VS, wDVI_DE;
+
+wire        wVID_CLK, wVID_CLKx5;
+wire        wMEM_CLK;
+
+assign wVID_CLK   = wCLK24;
+assign wVID_CLKx5 = wCLK120;
+assign wCLK8      = iCLK;
+
+// internal oscillator
+cyclone10lp_oscillator   osc
+  ( 
+  .clkout(wOSC_CLK),
+  .oscena(1'b1));
+
+// system PLL
+SYSTEM_PLL PLL_inst(
+  .areset(1'b0),
+  .inclk0(wCLK8),
+  .c0(wCLK24),
+  .c1(wCLK120),
+  .c2(wMEM_CLK),
+   .c3(oSDRAM_CLK),
+  .c4(wFLASH_CLK),
+   
+  .locked());
+
+
+reg [5:0] rRESETCNT;
+
+always @(posedge wMEM_CLK)
+begin
+  if (!rRESETCNT[5])
+  begin
+  rRESETCNT<=rRESETCNT+1;
+  end
+end
 
 endmodule
