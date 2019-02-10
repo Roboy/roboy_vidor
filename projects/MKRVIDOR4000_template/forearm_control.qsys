@@ -6,7 +6,7 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
    element MYOControl_0
@@ -39,7 +39,7 @@
  <parameter name="hideFromIPCatalog" value="false" />
  <parameter name="lockedInterfaceDefinition" value="" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="" />
+ <parameter name="projectName" value="MKRVIDOR4000.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="testBenchDutName" value="" />
@@ -47,6 +47,11 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
+ <interface
+   name="myocontrol_0_avalon_slave_0"
+   internal="MYOControl_0.avalon_slave_0"
+   type="avalon"
+   dir="end" />
  <interface
    name="myocontrol_0_conduit_end"
    internal="MYOControl_0.conduit_end"

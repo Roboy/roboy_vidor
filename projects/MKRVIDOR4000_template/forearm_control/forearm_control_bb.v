@@ -1,7 +1,6 @@
 
 module forearm_control (
 	clk_clk,
-	reset_reset_n,
 	myocontrol_0_conduit_end_miso,
 	myocontrol_0_conduit_end_mosi,
 	myocontrol_0_conduit_end_sck,
@@ -12,10 +11,16 @@ module forearm_control (
 	myocontrol_0_conduit_end_angle_miso,
 	myocontrol_0_conduit_end_angle_mosi,
 	myocontrol_0_conduit_end_angle_sck,
-	myocontrol_0_conduit_end_angle_ss_n_o);	
+	myocontrol_0_conduit_end_angle_ss_n_o,
+	reset_reset_n,
+	myocontrol_0_avalon_slave_0_address,
+	myocontrol_0_avalon_slave_0_write,
+	myocontrol_0_avalon_slave_0_writedata,
+	myocontrol_0_avalon_slave_0_read,
+	myocontrol_0_avalon_slave_0_readdata,
+	myocontrol_0_avalon_slave_0_waitrequest);	
 
 	input		clk_clk;
-	input		reset_reset_n;
 	input		myocontrol_0_conduit_end_miso;
 	output		myocontrol_0_conduit_end_mosi;
 	output		myocontrol_0_conduit_end_sck;
@@ -27,4 +32,11 @@ module forearm_control (
 	output		myocontrol_0_conduit_end_angle_mosi;
 	output		myocontrol_0_conduit_end_angle_sck;
 	output	[2:0]	myocontrol_0_conduit_end_angle_ss_n_o;
+	input		reset_reset_n;
+	input	[15:0]	myocontrol_0_avalon_slave_0_address;
+	input		myocontrol_0_avalon_slave_0_write;
+	input	[31:0]	myocontrol_0_avalon_slave_0_writedata;
+	input		myocontrol_0_avalon_slave_0_read;
+	output	[31:0]	myocontrol_0_avalon_slave_0_readdata;
+	output		myocontrol_0_avalon_slave_0_waitrequest;
 endmodule

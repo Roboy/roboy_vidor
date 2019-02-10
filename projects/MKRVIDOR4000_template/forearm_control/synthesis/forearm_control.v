@@ -4,19 +4,25 @@
 
 `timescale 1 ps / 1 ps
 module forearm_control (
-		input  wire       clk_clk,                                       //                      clk.clk
-		input  wire       myocontrol_0_conduit_end_miso,                 // myocontrol_0_conduit_end.miso
-		output wire       myocontrol_0_conduit_end_mosi,                 //                         .mosi
-		output wire       myocontrol_0_conduit_end_sck,                  //                         .sck
-		output wire [2:0] myocontrol_0_conduit_end_ss_n,                 //                         .ss_n
-		input  wire       myocontrol_0_conduit_end_mirrored_muscle_unit, //                         .mirrored_muscle_unit
-		input  wire       myocontrol_0_conduit_end_power_sense_n,        //                         .power_sense_n
-		output wire       myocontrol_0_conduit_end_gpio_n,               //                         .gpio_n
-		input  wire       myocontrol_0_conduit_end_angle_miso,           //                         .angle_miso
-		output wire       myocontrol_0_conduit_end_angle_mosi,           //                         .angle_mosi
-		output wire       myocontrol_0_conduit_end_angle_sck,            //                         .angle_sck
-		output wire [2:0] myocontrol_0_conduit_end_angle_ss_n_o,         //                         .angle_ss_n_o
-		input  wire       reset_reset_n                                  //                    reset.reset_n
+		input  wire        clk_clk,                                       //                         clk.clk
+		input  wire [15:0] myocontrol_0_avalon_slave_0_address,           // myocontrol_0_avalon_slave_0.address
+		input  wire        myocontrol_0_avalon_slave_0_write,             //                            .write
+		input  wire [31:0] myocontrol_0_avalon_slave_0_writedata,         //                            .writedata
+		input  wire        myocontrol_0_avalon_slave_0_read,              //                            .read
+		output wire [31:0] myocontrol_0_avalon_slave_0_readdata,          //                            .readdata
+		output wire        myocontrol_0_avalon_slave_0_waitrequest,       //                            .waitrequest
+		input  wire        myocontrol_0_conduit_end_miso,                 //    myocontrol_0_conduit_end.miso
+		output wire        myocontrol_0_conduit_end_mosi,                 //                            .mosi
+		output wire        myocontrol_0_conduit_end_sck,                  //                            .sck
+		output wire [2:0]  myocontrol_0_conduit_end_ss_n,                 //                            .ss_n
+		input  wire        myocontrol_0_conduit_end_mirrored_muscle_unit, //                            .mirrored_muscle_unit
+		input  wire        myocontrol_0_conduit_end_power_sense_n,        //                            .power_sense_n
+		output wire        myocontrol_0_conduit_end_gpio_n,               //                            .gpio_n
+		input  wire        myocontrol_0_conduit_end_angle_miso,           //                            .angle_miso
+		output wire        myocontrol_0_conduit_end_angle_mosi,           //                            .angle_mosi
+		output wire        myocontrol_0_conduit_end_angle_sck,            //                            .angle_sck
+		output wire [2:0]  myocontrol_0_conduit_end_angle_ss_n_o,         //                            .angle_ss_n_o
+		input  wire        reset_reset_n                                  //                       reset.reset_n
 	);
 
 	wire    rst_controller_reset_out_reset; // rst_controller:reset_out -> MYOControl_0:reset
@@ -27,12 +33,12 @@ module forearm_control (
 		.ENABLE_MYOBRICK_CONTROL (0)
 	) myocontrol_0 (
 		.reset                (rst_controller_reset_out_reset),                //          reset.reset
-		.address              (),                                              // avalon_slave_0.address
-		.write                (),                                              //               .write
-		.writedata            (),                                              //               .writedata
-		.read                 (),                                              //               .read
-		.readdata             (),                                              //               .readdata
-		.waitrequest          (),                                              //               .waitrequest
+		.address              (myocontrol_0_avalon_slave_0_address),           // avalon_slave_0.address
+		.write                (myocontrol_0_avalon_slave_0_write),             //               .write
+		.writedata            (myocontrol_0_avalon_slave_0_writedata),         //               .writedata
+		.read                 (myocontrol_0_avalon_slave_0_read),              //               .read
+		.readdata             (myocontrol_0_avalon_slave_0_readdata),          //               .readdata
+		.waitrequest          (myocontrol_0_avalon_slave_0_waitrequest),       //               .waitrequest
 		.miso                 (myocontrol_0_conduit_end_miso),                 //    conduit_end.miso
 		.mosi                 (myocontrol_0_conduit_end_mosi),                 //               .mosi
 		.sck                  (myocontrol_0_conduit_end_sck),                  //               .sck

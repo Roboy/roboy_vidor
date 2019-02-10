@@ -1,1 +1,0 @@
-Warning (10268): Verilog HDL information at PIDController.v(61): always construct contains both blocking and non-blocking assignments File: /home/letrend/workspace/roboy_vidor/roboy_fpga_code/roboy_fpga_code/myo_control/PIDController.v Line: 61
