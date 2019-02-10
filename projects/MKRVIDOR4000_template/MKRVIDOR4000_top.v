@@ -160,8 +160,8 @@ reg write;
 wire [7:0] data_out;
 wire [7:0] data_in;
 assign data_in = fpga_to_samd[byte_counter];
-reg [7:0] samd_to_fpga[88:0];
-reg [7:0] fpga_to_samd[88:0];
+reg [7:0] samd_to_fpga[85:0];
+reg [7:0] fpga_to_samd[85:0];
 wire data_out_valid;
 reg data_out_valid_prev;
 
@@ -323,15 +323,15 @@ always @(posedge iCLK) begin: SPICONTROL_SPILOGIC
 				40: avalon_writedata <= samd_to_fpga[80][3];
 				41: avalon_writedata <= samd_to_fpga[80][2];
 				// control_mode
-				42: avalon_writedata <= samd_to_fpga[81];
-				43: avalon_writedata <= samd_to_fpga[82];
-				44: avalon_writedata <= samd_to_fpga[83];
-				45: avalon_writedata <= samd_to_fpga[84];
+				42: avalon_writedata <= samd_to_fpga[81][7:6];
+				43: avalon_writedata <= samd_to_fpga[81][5:4];
+				44: avalon_writedata <= samd_to_fpga[81][3:2];
+				45: avalon_writedata <= samd_to_fpga[81][1:0];
 				// outputDivider
-				46: avalon_writedata <= samd_to_fpga[85];
-				47: avalon_writedata <= samd_to_fpga[86];
-				48: avalon_writedata <= samd_to_fpga[87];
-				49: avalon_writedata <= samd_to_fpga[88];
+				46: avalon_writedata <= samd_to_fpga[82];
+				47: avalon_writedata <= samd_to_fpga[83];
+				48: avalon_writedata <= samd_to_fpga[84];
+				49: avalon_writedata <= samd_to_fpga[85];
 			endcase 
 			write_val <= write_val + 1;
 			avalon_write <= 1;

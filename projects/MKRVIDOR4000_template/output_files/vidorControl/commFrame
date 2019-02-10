@@ -1,0 +1,31 @@
+WRITE
+------------------------------------
+Kp			4x16bit													64bit
+Ki			4x16bit													64bit
+Kd			4x16bit													64bit
+sp 			4x32bit													128bit
+outputPosMax		4x16bit													64bit
+outputNegMax		4x16bit													64bit
+IntegralPosMax		4x16bit													64bit
+IntegralNegMax		4x16bit													64bit
+deadBand		4x16bit													64bit
+[reset_myo_control spi_activated reset_controller0 reset_controller0 reset_controller2 reset_controller3 ] 1x8bit		8bit
+[control_mode0 control_mode1 control_mode2 control_mode3]		1x 8bit							8bit
+outputDivider		4x 8bit													32bit
+sp_hand_motor		1x32bit													32bit
+electro_mag		1x 8bit													8bit
+
+READ
+-----------------------------------
+# myoMuscles
+pos			4x32bit													128bit
+vel			4x16bit													64bit
+dis			4x16bit													64bit
+cur			4x16bit													64bit
+pwmRef			4x16bit													64bit
+
+# hand
+tlv493			3x16bit													48bit
+motor_pos		1x32bit													32bit
+
+
