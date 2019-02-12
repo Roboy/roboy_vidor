@@ -1,7 +1,7 @@
 #include <wiring_private.h>
 
 // uncomment for USB-blaster functionality
-//#define BLAST
+#define BLAST
 
 #ifdef BLAST
   #include <SPI.h>
@@ -22,6 +22,9 @@
   #include <SPI.h>
   #include <WiFiNINA.h>
   #include <WiFiUdp.h>
+  #include <DualMAX14870MotorShield.h>
+  DualMAX14870MotorShield motors;
+  
   int status = WL_IDLE_STATUS;
   ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
   char ssid[] = "why-fi";        // your network SSID (name)
@@ -110,6 +113,9 @@
     SPI.begin();
     pinMode (slaveSelectPin, OUTPUT);
     pinMode (transmissionPin, OUTPUT);  
+
+    motors.enableDrivers();
+    motors.setM1Speed(100);
   }
 
   void loop() {
