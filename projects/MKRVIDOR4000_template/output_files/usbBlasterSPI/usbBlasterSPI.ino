@@ -1,7 +1,7 @@
 #include <wiring_private.h>
 
 // uncomment for USB-blaster functionality
-//#define BLAST
+#define BLAST
 
 #ifdef BLAST
   #include <SPI.h>

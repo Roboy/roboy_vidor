@@ -128,24 +128,25 @@ reg        avalon_read;
 reg [31:0] avalon_readdata;
 wire 		  avalon_waitrequest;
 
-forearm_control (
-		.clk_clk(iCLK),                                       //                      clk.clk
-		.myocontrol_0_conduit_end_miso(bMKR_D[1]),                 // myocontrol_0_conduit_end.miso
-		.myocontrol_0_conduit_end_mosi(bMKR_D[0]),                 //                         .mosi
-		.myocontrol_0_conduit_end_sck(bMKR_D[2]),                  //                         .sck
-		.myocontrol_0_conduit_end_ss_n(bMKR_D[5:3]),                 //                         .ss_n
-		.myocontrol_0_conduit_end_power_sense_n(1'b0),        //                         .power_sense_n
-		.reset_reset_n(1'b1),      
-		.myocontrol_0_avalon_slave_0_address(avalon_address),           // myocontrol_0_avalon_slave_0.address
-		.myocontrol_0_avalon_slave_0_write(avalon_write),             //                            .write
-		.myocontrol_0_avalon_slave_0_writedata(avalon_writedata),         //                            .writedata
-		.myocontrol_0_avalon_slave_0_read(avalon_read),              //                            .read
-		.myocontrol_0_avalon_slave_0_readdata(avalon_readdata),          //                            .readdata
-		.myocontrol_0_avalon_slave_0_waitrequest(avalon_waitrequest)  
+//assign bMKR_D[0] = wOSC_CLK;
+MYOControl #(NUMBER_OF_MOTORS,24_000_000,0) (
+	.clock(wCLK24),
+	.miso(bMKR_D[1]),                 // myocontrol_0_conduit_end.miso
+	.mosi(bMKR_D[0]),                 //                         .mosi
+	.sck(bMKR_D[2]),                  //                         .sck
+	.ss_n_o(bMKR_D[5:3]),                 //                         .ss_n
+	.power_sense_n(1'b0),        //                         .power_sense_n
+	.reset(1'b0),      
+	.address(avalon_address),           // myocontrol_0_avalon_slave_0.address
+	.write(avalon_write),             //                            .write
+	.writedata(avalon_writedata),         //                            .writedata
+	.read(avalon_read),              //                            .read
+	.readdata(avalon_readdata),          //                            .readdata
+	.waitrequest(avalon_waitrequest)  
 );
 
 spi_slave #(8,1'b0,1'b0,3) (
-	.clk_i(iCLK),
+	.clk_i(wCLK24),
 	.spi_sck_i(bMKR_D[9]),
    .spi_ssel_i(bMKR_D[7]),
    .spi_mosi_i(bMKR_D[8]),
@@ -172,7 +173,7 @@ reg [7:0] state = IDLE;
 reg [7:0] read_val;
 reg [7:0] write_val;
 
-always @(posedge iCLK) begin: SPICONTROL_SPILOGIC
+always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 	write <= 0;
 	data_out_valid_prev <= data_out_valid;
 	case(state) 
