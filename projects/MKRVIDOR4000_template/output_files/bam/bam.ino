@@ -1,6 +1,7 @@
 #include <wiring_private.h>
 #include "jtag.h"
 #include <SPI.h>
+#include <DualMAX14870MotorShield.h>
 
 #define TDI                               12
 #define TDO                               15
@@ -43,39 +44,48 @@ const unsigned char bitstream[] = {
   #include "app.h"
 };
 
-const int transmissionPin = 6;
-const int slaveSelectPin = 7;
+const int transmissionPin = A0;
+const int slaveSelectPin = A1;
 
 union COM_FRAME_READ{
   struct{
-    int32_t pos[4];
-    int16_t vel[4];
-    int16_t dis[4];
-    int16_t cur[4];
-    int16_t pwmRef[4];
+    int32_t pos[6];
+    int16_t vel[6];
+    int16_t dis[6];
+    int16_t cur[6];
+    int16_t pwmRef[6];
   }values;
-  uint8_t data[48];
+  uint8_t data[72];
 }com_frame_read;
 
 union COM_FRAME_WRITE{
   struct{
-    int16_t Kp[4];
-    int16_t Ki[4];
-    int16_t Kd[4];
-    int32_t sp[4];
-    int16_t outputPosMax[4];
-    int16_t outputNegMax[4];
-    int16_t IntegralPosMax[4];
-    int16_t IntegralNegMax[4];
-    int16_t deadBand[4];
-    uint8_t conf;
-    uint8_t control_mode;
-    uint8_t outputDivider[4];
-  }values = {.Kp = {1,1,1,1}, .Ki = {0,0,0,0}, .Kd = {0,0,0,0}, .sp = {0,0,0,0}, .outputPosMax = {500,500,500,500}, .outputNegMax = {-500,-500,-500,-500},
-    .IntegralPosMax = {0,0,0,0}, .IntegralNegMax = {0,0,0,0}, .deadBand = {0,0,0,0}, .conf =  0x40,  .control_mode=0, .outputDivider  = {0,0,0,0}
+    int16_t Kp[6];
+    int16_t Ki[6];
+    int16_t Kd[6];
+    int32_t sp[6];
+    int16_t outputPosMax[6];
+    int16_t outputNegMax[6];
+    int16_t IntegralPosMax[6];
+    int16_t IntegralNegMax[6];
+    int16_t deadBand[6];
+    uint8_t conf[2];
+    uint8_t control_mode[6];
+    uint8_t outputDivider[6];
+  }values = {.Kp = {1,1,1,1,1,1}, .Ki = {0,0,0,0,0,0}, .Kd = {0,0,0,0,0,0}, .sp = {0,0,0,0,0,0}, .outputPosMax = {500,500,500,500,500,500}, .outputNegMax = {-500,-500,-500,-500,-500,-500},
+    .IntegralPosMax = {0,0,0,0,0,0}, .IntegralNegMax = {0,0,0,0,0,0}, .deadBand = {0,0,0,0,0,0}, .conf =  {0,1},  .control_mode= {0,0,0,0,0,0}, .outputDivider  = {0,0,0,0,0,0}
   };
-  uint8_t data[86];
+  uint8_t data[134];
 }com_frame_write;
+
+
+#define M1DIR A3
+#define M1PWM A4
+#define M2DIR 99
+#define M2PWM 99
+#define nEN A5
+#define nFAULT A6
+DualMAX14870MotorShield motors(M1DIR,M1PWM,M2DIR,M2PWM,nEN,nFAULT);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -114,17 +124,22 @@ void setup() {
   
   SPI.begin();
   pinMode (slaveSelectPin, OUTPUT);
-  pinMode (transmissionPin, OUTPUT);  
+  pinMode (transmissionPin, OUTPUT); 
+
+  motors.enableDrivers();
+  motors.setM1Speed(100);
 }
 
 // the loop function runs over and over again forever
 void loop() {
   digitalWrite(transmissionPin, LOW);
-  for(int i=0;i<86;i++){
+  for(int i=0;i<134;i++){
     digitalWrite(slaveSelectPin, LOW);
     SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-    if(i<48)
+    if(i<72)
       com_frame_read.data[i] = SPI.transfer(com_frame_write.data[i]);
+    else
+      SPI.transfer(com_frame_write.data[i]);
     SPI.endTransaction();
     digitalWrite(slaveSelectPin, HIGH);
   }
