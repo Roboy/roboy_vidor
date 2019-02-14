@@ -85,7 +85,7 @@ union COM_FRAME_WRITE{
 #define M2PWM 99
 #define nEN A5
 #define nFAULT A6
-DualMAX14870MotorShield motors(M1DIR,M1PWM,M2DIR,M2PWM,nEN,nFAULT);
+//DualMAX14870MotorShield motors(M1DIR,M1PWM,M2DIR,M2PWM,nEN,nFAULT);
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -126,8 +126,10 @@ void setup() {
   pinMode (slaveSelectPin, OUTPUT);
   pinMode (transmissionPin, OUTPUT); 
 
-  motors.enableDrivers();
-  motors.setM1Speed(100);
+  Serial.begin(115200);
+
+//  motors.enableDrivers();
+//  motors.setM1Speed(100);
 }
 
 // the loop function runs over and over again forever
@@ -144,4 +146,15 @@ void loop() {
     digitalWrite(slaveSelectPin, HIGH);
   }
   digitalWrite(transmissionPin, HIGH);
+  Serial.println("------------------------------------------------------------------");
+  char str[200];
+  sprintf(str,"pos %d %d %d %d %d %d\n", com_frame_read.values.pos[0], com_frame_read.values.pos[1], com_frame_read.values.pos[2], com_frame_read.values.pos[3], com_frame_read.values.pos[4], com_frame_read.values.pos[5]);
+  Serial.println(str);
+  sprintf(str,"vel %d %d %d %d %d %d\n", com_frame_read.values.vel[0], com_frame_read.values.vel[1], com_frame_read.values.vel[2], com_frame_read.values.vel[3], com_frame_read.values.vel[4], com_frame_read.values.vel[5]);
+  Serial.println(str);
+  sprintf(str,"dis %d %d %d %d %d %d\n", com_frame_read.values.dis[0], com_frame_read.values.dis[1], com_frame_read.values.dis[2], com_frame_read.values.dis[3], com_frame_read.values.dis[4], com_frame_read.values.dis[5]);
+  Serial.println(str);
+  sprintf(str,"cur %d %d %d %d %d %d\n", com_frame_read.values.cur[0], com_frame_read.values.cur[1], com_frame_read.values.cur[2], com_frame_read.values.cur[3], com_frame_read.values.cur[4], com_frame_read.values.cur[5]);
+  Serial.println(str);
+  delay(500);
 }

@@ -397,7 +397,7 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 				end
 		end
 		READ: begin
-			if(read_val<=19) begin
+			if(read_val<=29) begin
 				// lets set the address for the respective values
 				case(read_val)
 					// position
