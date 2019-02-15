@@ -128,13 +128,13 @@ reg        avalon_read;
 reg [31:0] avalon_readdata;
 wire 		  avalon_waitrequest;
 
-//assign bMKR_D[0] = wOSC_CLK;
+assign bMKR_D[13] = wCLK24;
 MYOControl #(NUMBER_OF_MOTORS,24_000_000,0) (
 	.clock(wCLK24),
 	.miso(bMKR_D[1]),                 // myocontrol_0_conduit_end.miso
 	.mosi(bMKR_D[0]),                 //                         .mosi
 	.sck(bMKR_D[2]),                  //                         .sck
-	.ss_n_o(bMKR_D[7:3]),                 //                         .ss_n
+	.ss_n_o({bMKR_A[2],bMKR_D[7:3]}),                 //                         .ss_n
 	.power_sense_n(1'b0),        //                         .power_sense_n
 	.reset(1'b0),      
 	.address(avalon_address),           // myocontrol_0_avalon_slave_0.address
