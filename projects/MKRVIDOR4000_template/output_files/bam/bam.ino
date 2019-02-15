@@ -2,6 +2,8 @@
 #include "jtag.h"
 #include <SPI.h>
 #include <DualMAX14870MotorShield.h>
+#include <WiFiNINA.h>
+#include <WiFiUdp.h>
 
 #define TDI                               12
 #define TDO                               15
@@ -47,6 +49,17 @@ const unsigned char bitstream[] = {
 const int transmissionPin = A0;
 const int slaveSelectPin = A1;
 
+int status = WL_IDLE_STATUS;
+#include "secrets.h"
+///////please enter your sensitive data in the Secret tab/arduino_secrets.h
+char ssid[] = SECRET_SSID;        // your network SSID (name)
+char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
+int keyIndex = 0;            // your network key Index number (needed only for WEP)
+
+unsigned int localPort = 8000;      // local port to listen on
+
+WiFiUDP Udp;
+
 union COM_FRAME_READ{
   struct{
     int32_t pos[6];
@@ -86,6 +99,25 @@ union COM_FRAME_WRITE{
 #define nEN A5
 #define nFAULT A6
 //DualMAX14870MotorShield motors(M1DIR,M1PWM,M2DIR,M2PWM,nEN,nFAULT);
+
+IPAddress remoteIp(192,168,0,227);
+
+void printWifiStatus() {
+  // print the SSID of the network you're attached to:
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  // print your board's IP address:
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  // print the received signal strength:
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+}
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -130,7 +162,30 @@ void setup() {
 
 //  motors.enableDrivers();
 //  motors.setM1Speed(100);
+
+  // check for the WiFi module:
+  if (WiFi.status() == WL_NO_MODULE) {
+    Serial.println("Communication with WiFi module failed!");
+    // don't continue
+    while (true);
+  }
+
+  // attempt to connect to Wifi network:
+  while (status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
+    status = WiFi.begin(ssid, pass);
+  }
+  Serial.println("Connected to wifi");
+  printWifiStatus();
+
+  Serial.println("\nStarting connection to server...");
+  // if you get a connection, report back via serial:
+  Udp.begin(localPort);
 }
+
+uint8_t data_in[134*2+1];
 
 // the loop function runs over and over again forever
 void loop() {
@@ -156,5 +211,21 @@ void loop() {
   Serial.println(str);
   sprintf(str,"cur %d %d %d %d %d %d\n", com_frame_read.values.cur[0], com_frame_read.values.cur[1], com_frame_read.values.cur[2], com_frame_read.values.cur[3], com_frame_read.values.cur[4], com_frame_read.values.cur[5]);
   Serial.println(str);
+
+  int packetSize = Udp.parsePacket();
+  if (packetSize == 134*2+1) {
+    
+    // read the packet into packetBufffer
+    Udp.read(data_in, 134*2+1);
+    if(data_in[134*2]==0){ // if the last byte matches me
+      Serial.println("receving data");
+      memcpy(com_frame_write.data,&data_in[134*0],134);
+  
+      Udp.beginPacket(remoteIp, Udp.remotePort());
+      Udp.write(com_frame_read.data,72);
+      Udp.endPacket();
+    }
+  }
+  
   delay(500);
 }
