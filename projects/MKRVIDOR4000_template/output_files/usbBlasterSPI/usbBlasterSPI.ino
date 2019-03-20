@@ -8,7 +8,7 @@
   #include "Blaster.h"
   extern void enableFpgaClock();
   void setup(){
-    USBBlaster.setOutEpSize(60);
+    USBBlaster.setOutEpSize(62);
     USBBlaster.begin(true);
     // also start the 48MHz clock feed for the FPGA, in case we need to run the bitstream and need this clock
     enableFpgaClock();
