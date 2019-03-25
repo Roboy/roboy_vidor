@@ -1,0 +1,39 @@
+	MKRVIDOR4000_mipi u0 (
+		.clk_clk        (<connected-to-clk_clk>),        //      clk.clk
+		.fb_st_start    (<connected-to-fb_st_start>),    //    fb_st.start
+		.fb_st_data     (<connected-to-fb_st_data>),     //         .data
+		.fb_st_dv       (<connected-to-fb_st_dv>),       //         .dv
+		.fb_st_ready    (<connected-to-fb_st_ready>),    //         .ready
+		.fb_vport_blu   (<connected-to-fb_vport_blu>),   // fb_vport.blu
+		.fb_vport_de    (<connected-to-fb_vport_de>),    //         .de
+		.fb_vport_grn   (<connected-to-fb_vport_grn>),   //         .grn
+		.fb_vport_hs    (<connected-to-fb_vport_hs>),    //         .hs
+		.fb_vport_vs    (<connected-to-fb_vport_vs>),    //         .vs
+		.fb_vport_red   (<connected-to-fb_vport_red>),   //         .red
+		.mipi_rx_clk    (<connected-to-mipi_rx_clk>),    //  mipi_rx.clk
+		.mipi_rx_data   (<connected-to-mipi_rx_data>),   //         .data
+		.mipi_st_data   (<connected-to-mipi_st_data>),   //  mipi_st.data
+		.mipi_st_start  (<connected-to-mipi_st_start>),  //         .start
+		.mipi_st_dv     (<connected-to-mipi_st_dv>),     //         .dv
+		.reset_reset_n  (<connected-to-reset_reset_n>),  //    reset.reset_n
+		.vid_clk        (<connected-to-vid_clk>),        //      vid.clk
+		.arb_mipi_clk   (<connected-to-arb_mipi_clk>),   // arb_mipi.clk
+		.arb_mipi_data  (<connected-to-arb_mipi_data>),  //         .data
+		.arb_mipi_dv    (<connected-to-arb_mipi_dv>),    //         .dv
+		.arb_mipi_start (<connected-to-arb_mipi_start>), //         .start
+		.arb_fb_clk     (<connected-to-arb_fb_clk>),     //   arb_fb.clk
+		.arb_fb_rdy     (<connected-to-arb_fb_rdy>),     //         .rdy
+		.arb_fb_data    (<connected-to-arb_fb_data>),    //         .data
+		.arb_fb_dv      (<connected-to-arb_fb_dv>),      //         .dv
+		.arb_fb_start   (<connected-to-arb_fb_start>),   //         .start
+		.sdram_addr     (<connected-to-sdram_addr>),     //    sdram.addr
+		.sdram_ba       (<connected-to-sdram_ba>),       //         .ba
+		.sdram_cas_n    (<connected-to-sdram_cas_n>),    //         .cas_n
+		.sdram_cke      (<connected-to-sdram_cke>),      //         .cke
+		.sdram_cs_n     (<connected-to-sdram_cs_n>),     //         .cs_n
+		.sdram_dq       (<connected-to-sdram_dq>),       //         .dq
+		.sdram_dqm      (<connected-to-sdram_dqm>),      //         .dqm
+		.sdram_ras_n    (<connected-to-sdram_ras_n>),    //         .ras_n
+		.sdram_we_n     (<connected-to-sdram_we_n>)      //         .we_n
+	);
+
