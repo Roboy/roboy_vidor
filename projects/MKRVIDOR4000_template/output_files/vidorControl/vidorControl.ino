@@ -38,21 +38,8 @@ const unsigned char bitstream[] = {
   #include "app.h"
 };
 
-#include <SPI.h>
-#include <WiFiNINA.h>
-#include <WiFiUdp.h>
-int status = WL_IDLE_STATUS;
-///////please enter your sensitive data in the Secret tab/arduino_secrets.h
-char ssid[] = "why-fi";        // your network SSID (name)
-char pass[] = "gotohell11880";    // your network password (use for WPA, or use as key for WEP)
-
-unsigned int localPort = 2390;      // local port to listen on
-IPAddress remoteIP(192,168,2,113); 
-
-WiFiUDP Udp;
-
-const int transmissionPin = 6;
-const int slaveSelectPin = 7;
+const int transmissionPin = A0;
+const int slaveSelectPin = A1;
 
 union COM_FRAME_READ{
   struct{
@@ -79,28 +66,11 @@ union COM_FRAME_WRITE{
     uint8_t conf;
     uint8_t control_mode;
     uint8_t outputDivider[4];
-  }values = {.Kp = {1,1,1,1}, .Ki = {0,0,0,0}, .Kd = {0,0,0,0}, .sp = {0,0,0,0}, .outputPosMax = {500,500,500,500}, .outputNegMax = {-500,-500,-500,-500},
+  }values = {.Kp = {1,1,1,1}, .Ki = {0,0,0,0}, .Kd = {0,0,0,0}, .sp = {0,0,0,0}, .outputPosMax = {500,501,502,503}, .outputNegMax = {-500,-500,-500,-500},
     .IntegralPosMax = {0,0,0,0}, .IntegralNegMax = {0,0,0,0}, .deadBand = {0,0,0,0}, .conf =  0x40,  .control_mode=0, .outputDivider  = {0,0,0,0}
   };
   uint8_t data[86];
 }com_frame_write;
-
-void printWifiStatus() {
-  // print the SSID of the network you're attached to:
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-
-  // print your board's IP address:
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-
-  // print the received signal strength:
-  long rssi = WiFi.RSSI();
-  Serial.print("signal strength (RSSI):");
-  Serial.print(rssi);
-  Serial.println(" dBm");
-}
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -113,9 +83,9 @@ void setup() {
   int ret;
   uint32_t ptr[1];
 
-//  pinPeripheral(30, PIO_AC_CLK);
-//  clockout(0, 1);
-//  delay(1000);  
+  pinPeripheral(30, PIO_AC_CLK);
+  clockout(0, 1);
+  delay(1000);  
   //Init Jtag Port
   ret = jtagInit();
   mbPinSet();
@@ -138,29 +108,11 @@ void setup() {
 
   // Configure other share pins as input too
   pinMode(SIGNAL_IN, INPUT);
-pinMode(MB_INT, INPUT);
+  pinMode(MB_INT, INPUT);
 
   // Configure onboard LED Pin as output
   pinMode(LED_BUILTIN, OUTPUT);
   
-
-//  // check for the WiFi module:
-//  if (WiFi.status() == WL_NO_MODULE) {
-//    Serial.println("Communication with WiFi module failed!");
-//    // don't continue
-//    while (true);
-//  }
-//
-//  // attempt to connect to Wifi network:
-//  while (status != WL_CONNECTED) {
-//    Serial.print("Attempting to connect to SSID: ");
-//    Serial.println(ssid);
-//    // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-//    status = WiFi.begin(ssid, pass);
-//  }
-//  Serial.println("Connected to wifi");
-//  printWifiStatus();
-//  Udp.begin(localPort);
   SPI.begin();
   pinMode (slaveSelectPin, OUTPUT);
   pinMode (transmissionPin, OUTPUT);  
@@ -177,36 +129,19 @@ void loop() {
     digitalWrite(slaveSelectPin, HIGH);
   }
   digitalWrite(transmissionPin, HIGH);
-
-//  // if there's data available, read a packet
-//  int packetSize = Udp.parsePacket();
-//  if (packetSize) {
-//    Serial.print("Received packet of size ");
-//    Serial.println(packetSize);
-//    Serial.print("From ");
-//    IPAddress remoteIp = Udp.remoteIP();
-//    Serial.print(remoteIp);
-//    Serial.print(", port ");
-//    Serial.println(Udp.remotePort());
-//
-//    // read the packet into packetBufffer
-//    int len = Udp.read(com_frame_write.data, packetSize);
-//  }
-//
-//  // send a reply, to the IP address and port that sent us the packet we received
-//  Udp.beginPacket(remoteIP, 8000);
-//  Udp.write(com_frame_read.data,48);
-//  Udp.endPacket();
-//    char str[200];
-//    sprintf(str,"pos:\t%d\t%d\t%d\t%d\n", com_frame_read.values.pos[0], com_frame_read.values.pos[1], com_frame_read.values.pos[2], com_frame_read.values.pos[3] );
-//    Serial.print(str);
-//    sprintf(str,"vel:\t%d\t%d\t%d\t%d\n", com_frame_read.values.vel[0], com_frame_read.values.vel[1], com_frame_read.values.vel[2], com_frame_read.values.vel[3] );
-//    Serial.print(str);
-//    sprintf(str,"dis:\t%d\t%d\t%d\t%d\n", com_frame_read.values.dis[0], com_frame_read.values.dis[1], com_frame_read.values.dis[2], com_frame_read.values.dis[3] );
-//    Serial.print(str);
-//    sprintf(str,"cur:\t%d\t%d\t%d\t%d\n", com_frame_read.values.cur[0], com_frame_read.values.cur[1], com_frame_read.values.cur[2], com_frame_read.values.cur[3] );
-//    Serial.print(str);
-//    sprintf(str,"pwm:\t%d\t%d\t%d\t%d\n", com_frame_read.values.pwmRef[0], com_frame_read.values.pwmRef[1], com_frame_read.values.pwmRef[2], com_frame_read.values.pwmRef[3] );
-//    Serial.print(str);
-//    delay(1000);
-}
+  char str[200];
+  Serial.print("----------------MyoCommands----------------\n");
+  for(int i=0;i<4;i++){
+    sprintf(str, "Kp %d, Ki %d, Kd %d, sp %d, outputPosMax %d, outputNegMax %d, IntegralPosMax %d, IntegralNegMax %d, deadBand %d, control_mode %d, outputDivider %d", 
+    com_frame_write.values.Kp[i], com_frame_write.values.Ki[i], com_frame_write.values.Kd[i], com_frame_write.values.sp[i], com_frame_write.values.outputPosMax[i], com_frame_write.values.outputNegMax[i], com_frame_write.values.IntegralPosMax[i], 
+    com_frame_write.values.IntegralNegMax[i], com_frame_write.values.deadBand[i], com_frame_write.values.control_mode, com_frame_write.values.outputDivider[i]); 
+    Serial.println(str);
+  }
+  Serial.print("----------------MyoStatus------------------\n");
+  for(int i=0;i<4;i++){
+    sprintf(str, "pos %d, vel %d, dis %d, current %d", 
+    com_frame_read.values.pos[i], com_frame_read.values.vel[i], com_frame_read.values.dis[i], com_frame_read.values.cur[i]); 
+    Serial.println(str);
+  }
+  delay(1000);
+};
