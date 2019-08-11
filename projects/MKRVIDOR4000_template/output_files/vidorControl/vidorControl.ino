@@ -41,36 +41,46 @@ const unsigned char bitstream[] = {
 const int transmissionPin = A0;
 const int slaveSelectPin = A1;
 
-union COM_FRAME_READ{
+typedef union SPI_FRAME{
   struct{
-    int32_t pos[4];
-    int16_t vel[4];
-    int16_t dis[4];
-    int16_t cur[4];
-    int16_t pwmRef[4];
-  }values;
-  uint8_t data[48];
-}com_frame_read;
-
-union COM_FRAME_WRITE{
-  struct{
-    int16_t Kp[4];
-    int16_t Ki[4];
-    int16_t Kd[4];
-    int32_t sp[4];
-    int16_t outputPosMax[4];
-    int16_t outputNegMax[4];
-    int16_t IntegralPosMax[4];
-    int16_t IntegralNegMax[4];
-    int16_t deadBand[4];
-    uint8_t conf;
+    uint8_t motor;
+    float Kp;
+    float Ki;
+    float Kd;
+    float sp;
+    int32_t outputLimit;
     uint8_t control_mode;
-    uint8_t outputDivider[4];
-  }values = {.Kp = {1,1,1,1}, .Ki = {0,0,0,0}, .Kd = {0,0,0,0}, .sp = {0,0,0,0}, .outputPosMax = {500,501,502,503}, .outputNegMax = {-500,-500,-500,-500},
-    .IntegralPosMax = {0,0,0,0}, .IntegralNegMax = {0,0,0,0}, .deadBand = {0,0,0,0}, .conf =  0x40,  .control_mode=0, .outputDivider  = {0,0,0,0}
-  };
-  uint8_t data[86];
-}com_frame_write;
+    uint16_t controlFlags;
+    int32_t update_frequency;
+    float pos_encoder_multiplier;
+    float dis_encoder_multiplier;
+    int16_t pwmRef;
+    int32_t position;
+    int16_t velocity;
+    int16_t current;
+    int32_t displacement;
+    float position_raw;
+    float velocity_raw;
+    float displacement_raw;
+    float position_conv;
+    float velocity_conv;
+    float displacement_conv;
+    float displacement_myo_brick_conv;
+    float position_err;
+    float velocity_err;
+    float displacement_err;
+    float displacement_myo_brick_err;
+    int32_t position_res;
+    int32_t velocity_res;
+    int32_t displacement_res;
+    int32_t displacement_myo_brick_res;
+    int32_t actual_update_frequency;
+  }values;
+  uint8_t data[114];
+};
+
+SPI_FRAME com_frame_write, com_frame_read;
+const int NUMBER_OF_MOTORS = 6;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -116,31 +126,54 @@ void setup() {
   SPI.begin();
   pinMode (slaveSelectPin, OUTPUT);
   pinMode (transmissionPin, OUTPUT);  
+
+  com_frame_write.values.Kp = 1;
+  com_frame_write.values.Ki = 0;
+  com_frame_write.values.Kd = 0;
+  com_frame_write.values.sp = 0;
+  com_frame_write.values.outputLimit = 500;
+  com_frame_write.values.control_mode=0;
+  com_frame_write.values.controlFlags=0;
+  com_frame_write.values.pos_encoder_multiplier=0.1;
+  com_frame_write.values.dis_encoder_multiplier=0.1;
+  com_frame_write.values.update_frequency=0;
+  
 }
 
 void loop() {
-  digitalWrite(transmissionPin, LOW);
-  for(int i=0;i<87;i++){
-    digitalWrite(slaveSelectPin, LOW);
-    SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-    if(i<48)
-      com_frame_read.data[i] = SPI.transfer(com_frame_write.data[i]);
-    SPI.endTransaction();
-    digitalWrite(slaveSelectPin, HIGH);
-  }
-  digitalWrite(transmissionPin, HIGH);
-  char str[200];
-  Serial.print("----------------MyoCommands----------------\n");
-  for(int i=0;i<4;i++){
-    sprintf(str, "Kp %d, Ki %d, Kd %d, sp %d, outputPosMax %d, outputNegMax %d, IntegralPosMax %d, IntegralNegMax %d, deadBand %d, control_mode %d, outputDivider %d", 
-    com_frame_write.values.Kp[i], com_frame_write.values.Ki[i], com_frame_write.values.Kd[i], com_frame_write.values.sp[i], com_frame_write.values.outputPosMax[i], com_frame_write.values.outputNegMax[i], com_frame_write.values.IntegralPosMax[i], 
-    com_frame_write.values.IntegralNegMax[i], com_frame_write.values.deadBand[i], com_frame_write.values.control_mode, com_frame_write.values.outputDivider[i]); 
+  char str[400];
+  for(int motor=0; motor<NUMBER_OF_MOTORS;motor++){
+    com_frame_write.values.motor = motor;
+    digitalWrite(transmissionPin, LOW);
+    for(int i=0;i<114;i++){
+      digitalWrite(slaveSelectPin, LOW);
+      SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
+      if(i<35)
+        SPI.transfer(com_frame_write.data[i]);
+      else
+        com_frame_read.data[i] = SPI.transfer(com_frame_write.data[i]);
+      SPI.endTransaction();
+      digitalWrite(slaveSelectPin, HIGH);
+    }
+    digitalWrite(transmissionPin, HIGH);
+    sprintf(str, "motor %d ------------", motor);
     Serial.println(str);
-  }
-  Serial.print("----------------MyoStatus------------------\n");
-  for(int i=0;i<4;i++){
-    sprintf(str, "pos %d, vel %d, dis %d, current %d", 
-    com_frame_read.values.pos[i], com_frame_read.values.vel[i], com_frame_read.values.dis[i], com_frame_read.values.cur[i]); 
+    sprintf(str, "motor %d, Kp %f, Ki %f, Kd %f, sp %f, outputLimit %d, control_mode %d, controlFlags %d, update_frequency %d ,pos_encoder_multiplier %f, dis_encoder_multiplier %f", 
+    com_frame_write.values.motor, com_frame_write.values.Kp, com_frame_write.values.Ki, com_frame_write.values.Kd, com_frame_write.values.sp, com_frame_write.values.outputLimit,
+    com_frame_write.values.control_mode, com_frame_write.values.controlFlags, com_frame_write.values.update_frequency, com_frame_write.values.pos_encoder_multiplier, com_frame_write.values.dis_encoder_multiplier); 
+    Serial.println(str);
+    sprintf(str, "pwmRef %d, position %d, velocity %d, displacement %d\n"
+                 "position_raw %f, velocity_raw %f, displacement_raw %f\n"
+                 "position_conv %f, velocity_conv %f, displacement_conv %f, displacement_myo_brick_conv %f\n" 
+                 "position_err %f, velocity_err %f, displacement_err %f, displacement_myo_brick_err %f\n" 
+                 "position_res %d, velocity_res %d, displacement_res %d, displacement_myo_brick_res %d\n" 
+                 "actual_update_frequency %d",
+    com_frame_write.values.pwmRef, com_frame_write.values.position, com_frame_write.values.velocity, com_frame_write.values.displacement, 
+    com_frame_write.values.position_raw, com_frame_write.values.velocity_raw, com_frame_write.values.displacement_raw,
+    com_frame_write.values.position_conv, com_frame_write.values.velocity_conv, com_frame_write.values.displacement_conv, com_frame_write.values.displacement_myo_brick_conv, 
+    com_frame_write.values.position_err, com_frame_write.values.velocity_err, com_frame_write.values.displacement_err, com_frame_write.values.displacement_myo_brick_err, 
+    com_frame_write.values.position_res, com_frame_write.values.velocity_res, com_frame_write.values.displacement_res, com_frame_write.values.displacement_myo_brick_res, 
+    com_frame_write.values.actual_update_frequency); 
     Serial.println(str);
   }
   delay(1000);
