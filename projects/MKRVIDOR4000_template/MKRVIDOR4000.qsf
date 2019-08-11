@@ -89,6 +89,7 @@ set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
 
 
 set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name SYSTEMVERILOG_FILE MKRVIDOR4000_top.sv
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/fpu/trunk/verilog/primitives.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/fpu/trunk/verilog/pre_norm_fmul.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/fpu/trunk/verilog/pre_norm.v
