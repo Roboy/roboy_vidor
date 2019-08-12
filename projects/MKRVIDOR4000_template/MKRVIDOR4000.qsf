@@ -89,6 +89,9 @@ set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
 
 
 set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/q_rotary_enc/q_rotary_enc.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/q_rotary_enc/rot_enc_flt.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/q_rotary_enc/lpf_cap.sv
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/verilog_fixed_point_math_library/trunk/qmults.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/verilog_fixed_point_math_library/trunk/qmult.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/verilog_fixed_point_math_library/trunk/qdiv.v

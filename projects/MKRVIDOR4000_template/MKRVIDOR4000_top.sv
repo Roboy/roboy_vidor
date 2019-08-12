@@ -125,7 +125,7 @@ reg [10:0] pwm_delay;
 reg [10:0] pwm;
 
 always @(posedge wCLK24) begin: BLDC_COMMUTATION
-	if(pwm_delay>2000)begin
+	if(pwm_delay>(2047-pwm))begin
 		if(bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6]) begin
 			PHASES <= 6'b100100;
 		end 
@@ -150,59 +150,105 @@ always @(posedge wCLK24) begin: BLDC_COMMUTATION
 	pwm_delay <= pwm_delay+1;
 end
 
-//spi_slave #(8,1'b0,1'b0,3) spi_slave0(
-//	.clk_i(wCLK24),
-//	.spi_sck_i(bMKR_D[9]),
-//   .spi_ssel_i(bMKR_A[1]),
-//   .spi_mosi_i(bMKR_D[8]),
-//   .spi_miso_o(bMKR_D[10]),
-//   .di_i(data_in),
-//   .wren_i(write),
-//   .do_valid_o(data_out_valid),
-//   .do_o(data_out)
-//);
-//
-//wire [7:0] data_out;
-//wire [7:0] data_in;
-//assign data_in = fpga_to_samd[byte_counter];
-//reg [7:0] samd_to_fpga[113:0];
-//reg [7:0] fpga_to_samd[113:0];
-//wire data_out_valid;
-//reg data_out_valid_prev;
-//
-//reg [31:0] byte_counter;
-//
-//localparam IDLE = 0, WAIT_FOR_FRAME_TRANSMISSION = 1;
-//reg [7:0] state = IDLE;
-//integer j;
-//
-//always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
-//	data_out_valid_prev <= data_out_valid;
-//	case(state) 
-//		IDLE: begin
-//			byte_counter <= 0;
-//			if(bMKR_A[0]==0) begin
-//				state=WAIT_FOR_FRAME_TRANSMISSION;
-//				for(j=0;j<114;j=j+1)begin
-//					fpga_to_samd[j] <= j;
-//				end
-//			end
-//		end
-//		WAIT_FOR_FRAME_TRANSMISSION: begin
-//			if(bMKR_A[0]==0) begin // receiving 
-//				if(data_out_valid_prev==0 && data_out_valid==1) begin
-//					samd_to_fpga[byte_counter] = data_out;
-//					byte_counter <= byte_counter+1;
-//				end
-//			end else begin // receiving done
-//				
-//				state <= IDLE;
-//			end
-//		end
-//	endcase 
-//end
- 
+wire encoder_A, encoder_B, encoder_A_rising_edge, encoder_B_rising_edge;
+assign encoder_A = bMKR_A[3];
+assign encoder_B = bMKR_A[2];
+assign encoder_A_rising_edge = (bMKR_A[3] && !encoder_A_prev);
+assign encoder_B_rising_edge = (bMKR_A[2] && !encoder_B_prev);
 
+reg encoder_A_prev, encoder_B_prev;
+
+wire signed [31:0] position;
+
+rot_enc_flt encoder_0(wCLK24, 0, 0, bMKR_A[3], bMKR_A[2], position);
+
+//always @(posedge bMKR_A[3]) begin: OPTICAL_ENCODER
+//	position <= position +1;
+////	if(encoder_0_B_prev==1 && encoder_0_A_prev==0 && encoder_0_A) begin
+////		position <= position +1;
+////	end
+////	if(encoder_0_A_prev && encoder_0_B_prev && ~encoder_0_B) begin
+////		position <= position +1;
+////	end
+////	if(encoder_0_A_prev && ~encoder_0_A && ~encoder_0_B) begin
+////		position <= position +1;
+////	end
+//	
+////	if(encoder_0_B_prev && ~encoder_0_B && encoder_0_A) begin
+////		position <= position -1;
+////	end
+////	if(~encoder_0_B_prev && encoder_0_A_prev && ~encoder_0_A) begin
+////		position <= position -1;
+////	end
+////	if(~encoder_0_A_prev && ~encoder_0_B_prev && encoder_0_B) begin
+////		position <= position -1;
+////	end
+////	if(~encoder_0_A_prev && encoder_0_A && encoder_0_B) begin
+////		position <= position -1;
+////	end
+//end
+
+wire [7:0] data_out;
+wire [7:0] data_in;
+assign data_in = fpga_to_samd[byte_counter];
+reg [7:0] samd_to_fpga[19:0];
+reg [7:0] fpga_to_samd[19:0];
+wire data_out_valid;
+reg data_out_valid_prev;
+reg write;
+
+spi_slave #(8,1'b0,1'b0,3) spi_slave0(
+	.clk_i(wCLK24),
+	.spi_sck_i(bMKR_D[9]),
+   .spi_ssel_i(bMKR_D[7]),
+   .spi_mosi_i(bMKR_D[8]),
+   .spi_miso_o(bMKR_D[10]), 
+   .di_i(data_in),
+   .wren_i(write),
+   .do_valid_o(data_out_valid),
+   .do_o(data_out)
+);
+
+reg [31:0] byte_counter;
+
+localparam IDLE = 0, WAIT_FOR_FRAME_TRANSMISSION = 1;
+reg [7:0] state = IDLE;
+integer j;
+
+always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
+	data_out_valid_prev <= data_out_valid;
+	write <= 0;
+	case(state) 
+		IDLE: begin
+			byte_counter <= 0;
+			if(bMKR_D[6]==0) begin
+				state=WAIT_FOR_FRAME_TRANSMISSION;
+				write <= 1;
+			end
+		end
+		WAIT_FOR_FRAME_TRANSMISSION: begin
+			if(bMKR_D[6]==0) begin // receiving 
+				if(data_out_valid_prev==0 && data_out_valid==1) begin
+					samd_to_fpga[byte_counter] <= data_out;
+					if(byte_counter<2)begin
+						fpga_to_samd[byte_counter] <= data_out;
+					end
+					byte_counter <= byte_counter+1;
+					write <= 1;
+				end
+			end else begin // receiving done
+				pwm <= {samd_to_fpga[3],samd_to_fpga[2],samd_to_fpga[1],samd_to_fpga[0]};
+				fpga_to_samd[4] <= position[7:0];
+				fpga_to_samd[5] <= position[15:8];
+				fpga_to_samd[6] <= position[23:16];
+				fpga_to_samd[7] <= position[31:24];
+				state <= IDLE;
+			end 
+		end
+	endcase 
+end
+ 
+ 
 // signal declaration
 
 wire        wOSC_CLK;
