@@ -1,6 +1,7 @@
 #include <wiring_private.h>
 #include "jtag.h"
 #include <SPI.h>
+#include "ardprintf.h"
 
 #define TDI                               12
 #define TDO                               15
@@ -156,13 +157,11 @@ void loop() {
       digitalWrite(slaveSelectPin, HIGH);
     }
     digitalWrite(transmissionPin, HIGH);
-    sprintf(str, "motor %d ------------", motor);
-    Serial.println(str);
-    sprintf(str, "motor %d, Kp %f, Ki %f, Kd %f, sp %f, outputLimit %d, control_mode %d, controlFlags %d, update_frequency %d ,pos_encoder_multiplier %f, dis_encoder_multiplier %f", 
+    ardprintf("motor %d ------------", motor);
+    ardprintf("motor %d, Kp %f, Ki %f, Kd %f, sp %f, outputLimit %d, control_mode %d, controlFlags %d, update_frequency %d ,pos_encoder_multiplier %f, dis_encoder_multiplier %f", 
     com_frame_write.values.motor, com_frame_write.values.Kp, com_frame_write.values.Ki, com_frame_write.values.Kd, com_frame_write.values.sp, com_frame_write.values.outputLimit,
     com_frame_write.values.control_mode, com_frame_write.values.controlFlags, com_frame_write.values.update_frequency, com_frame_write.values.pos_encoder_multiplier, com_frame_write.values.dis_encoder_multiplier); 
-    Serial.println(str);
-    sprintf(str, "pwmRef %d, position %d, velocity %d, displacement %d\n"
+    ardprintf("pwmRef %d, position %d, velocity %d, displacement %d\n"
                  "position_raw %f, velocity_raw %f, displacement_raw %f\n"
                  "position_conv %f, velocity_conv %f, displacement_conv %f, displacement_myo_brick_conv %f\n" 
                  "position_err %f, velocity_err %f, displacement_err %f, displacement_myo_brick_err %f\n" 
@@ -174,7 +173,6 @@ void loop() {
     com_frame_write.values.position_err, com_frame_write.values.velocity_err, com_frame_write.values.displacement_err, com_frame_write.values.displacement_myo_brick_err, 
     com_frame_write.values.position_res, com_frame_write.values.velocity_res, com_frame_write.values.displacement_res, com_frame_write.values.displacement_myo_brick_res, 
     com_frame_write.values.actual_update_frequency); 
-    Serial.println(str);
   }
   delay(1000);
 };

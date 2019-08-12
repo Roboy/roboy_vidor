@@ -39,7 +39,7 @@ module MKRVIDOR4000_top
   output        oSDRAM_WEn,
 
   // SAM D21 PINS
-  inout         bMKR_AREF,
+  inout         bMKR_AREF,  
   inout  [6:0]  bMKR_A,
   inout  [14:0] bMKR_D,
   
@@ -121,21 +121,34 @@ module MKRVIDOR4000_top
 
 parameter NUMBER_OF_MOTORS = 6;
 
+reg [15:0] avalon_address;
+reg        avalon_write;
+reg [31:0] avalon_writedata;
+reg        avalon_read;
+reg [31:0] avalon_readdata;
+wire 		  avalon_waitrequest;
+
 MyoControlInterface #(.NUMBER_OF_MOTORS(NUMBER_OF_MOTORS)) myo_control_interface();
 
-assign bMKR_D[13] = wCLK24;
-MYOControl #(NUMBER_OF_MOTORS,24_000_000,0) (
+assign bMKR_D[13] = data_out_valid;
+MYOControl #(NUMBER_OF_MOTORS,24_000_000,0) myocontrol(  
 	.clock(wCLK24),
 	.miso(bMKR_D[1]),                 // myocontrol_0_conduit_end.miso
 	.mosi(bMKR_D[0]),                 //                         .mosi
 	.sck(bMKR_D[2]),                  //                         .sck
 	.ss_n_o({bMKR_A[2],bMKR_D[7:3]}),                 //                         .ss_n
 	.power_sense_n(1'b0),        //                         .power_sense_n
-	.reset(1'b0),      
+	.reset(1'b0),
+	.address(avalon_address),           // myocontrol_0_avalon_slave_0.address
+	.write(avalon_write),             //                            .write
+	.writedata(avalon_writedata),         //                            .writedata
+	.read(avalon_read),              //                            .read
+	.readdata(avalon_readdata),          //                            .readdata
+	.waitrequest(avalon_waitrequest),
 	.interf(myo_control_interface.child)
-);
+)/* synthesis preserve */; 
 
-spi_slave #(8,1'b0,1'b0,3) (
+spi_slave #(8,1'b0,1'b0,3) spi_slave0(
 	.clk_i(wCLK24),
 	.spi_sck_i(bMKR_D[9]),
    .spi_ssel_i(bMKR_A[1]),
@@ -145,7 +158,7 @@ spi_slave #(8,1'b0,1'b0,3) (
    .wren_i(write),
    .do_valid_o(data_out_valid),
    .do_o(data_out)
-);
+)/* synthesis preserve */;
 
 reg write;
 wire [7:0] data_out;
@@ -157,10 +170,6 @@ wire data_out_valid;
 reg data_out_valid_prev;
 
 reg [31:0] byte_counter;
-
-localparam IDLE = 0,  WRITE = 1, READ = 2, WAITREQUEST_WRITE = 3, WAITREQUEST_READ = 4, WAIT_FOR_FRAME_TRANSMISSION = 5;
-reg [7:0] state = IDLE;
-integer j;
 
 struct packed {     
 	logic [7:0] motor;
@@ -208,7 +217,7 @@ assign spi_values.controlFlags = {samd_to_fpga[23],samd_to_fpga[22]};
 assign spi_values.update_frequency = {samd_to_fpga[27],samd_to_fpga[26],samd_to_fpga[25],samd_to_fpga[24]};
 assign spi_values.pos_encoder_multiplier_f = {samd_to_fpga[31],samd_to_fpga[30],samd_to_fpga[29],samd_to_fpga[28]};
 assign spi_values.dis_encoder_multiplier_f = {samd_to_fpga[35],samd_to_fpga[34],samd_to_fpga[33],samd_to_fpga[32]};
-assign spi_values.pwmRef = {fpga_to_samd[37],fpga_to_samd[36]};
+assign spi_values.pwmRef = 16'hBEEF;//{fpga_to_samd[37],fpga_to_samd[36]};
 assign spi_values.position = {fpga_to_samd[41],fpga_to_samd[40],fpga_to_samd[39],fpga_to_samd[38]};
 assign spi_values.velocity = {fpga_to_samd[43],fpga_to_samd[42]};
 assign spi_values.current = {fpga_to_samd[45],fpga_to_samd[44]};
@@ -230,15 +239,20 @@ assign spi_values.displacement_res = {fpga_to_samd[105],fpga_to_samd[104],fpga_t
 assign spi_values.displacement_myo_brick_res = {fpga_to_samd[109],fpga_to_samd[108],fpga_to_samd[107],fpga_to_samd[106]};
 assign spi_values.actual_update_frequency = {fpga_to_samd[113],fpga_to_samd[112],fpga_to_samd[111],fpga_to_samd[110]};
 
+localparam IDLE = 0, WAIT_FOR_FRAME_TRANSMISSION = 1;
+reg [7:0] state = IDLE;
+integer j;
+
 always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
-	write <= 0;
 	data_out_valid_prev <= data_out_valid;
 	case(state) 
 		IDLE: begin
 			byte_counter <= 0;
 			if(bMKR_A[0]==0) begin
 				state=WAIT_FOR_FRAME_TRANSMISSION;
-				write <= 1;
+				for(j=0;j<114;j=j+1)begin
+					fpga_to_samd[j] <= j;
+				end
 			end
 		end
 		WAIT_FOR_FRAME_TRANSMISSION: begin
@@ -246,42 +260,41 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 				if(data_out_valid_prev==0 && data_out_valid==1) begin
 					samd_to_fpga[byte_counter] = data_out;
 					byte_counter <= byte_counter+1;
-					write <= 1;
 				end
 			end else begin // receiving done
 				for(j=0; j<NUMBER_OF_MOTORS;j++) begin
 					if(j==samd_to_fpga[0])begin
-						myo_control_interface.child.Kp_f[j] <= spi_values.Kp_f;
-						myo_control_interface.child.Ki_f[j] <= spi_values.Ki_f;
-						myo_control_interface.child.Kd_f[j] <= spi_values.Kd_f;
-						myo_control_interface.child.sp_f[j] <= spi_values.sp_f;
-						myo_control_interface.child.outputLimit[j] <= spi_values.outputLimit;
-						myo_control_interface.child.control_mode[j] <= spi_values.control_mode;
-						myo_control_interface.child.controlFlags[j] <= spi_values.controlFlags;
-						myo_control_interface.child.update_frequency[j] <= spi_values.update_frequency;
-						myo_control_interface.child.pos_encoder_multiplier_f[j] <= spi_values.pos_encoder_multiplier_f;
-						myo_control_interface.child.dis_encoder_multiplier_f[j] <= spi_values.dis_encoder_multiplier_f;
-						spi_values.pwmRef <= myo_control_interface.child.pwmRefs[j];
-						spi_values.position <= myo_control_interface.child.positions[j];
-						spi_values.velocity <= myo_control_interface.child.velocities[j];
-						spi_values.current <= myo_control_interface.child.currents[j];
-						spi_values.displacement <= myo_control_interface.child.displacements[j];
-						spi_values.position_raw_f <= myo_control_interface.child.positions_raw_f[j];
-						spi_values.velocity_raw_f <= myo_control_interface.child.velocities_raw_f[j];
-						spi_values.displacement_raw_f <= myo_control_interface.child.displacements_raw_f[j];
-						spi_values.position_conv_f <= myo_control_interface.child.positions_conv_f[j];
-						spi_values.velocity_conv_f <= myo_control_interface.child.velocities_conv_f[j];
-						spi_values.displacemen_conv_f <= myo_control_interface.child.displacements_conv_f[j];
-						spi_values.displacement_myo_brick_conv_f <= myo_control_interface.child.displacements_myo_brick_conv_f[j];
-						spi_values.position_err <= myo_control_interface.child.positions_err_f[j];
-						spi_values.velocity_err <= myo_control_interface.child.velocities_err_f[j];
-						spi_values.displacement_err <= myo_control_interface.child.displacements_err_f[j];
-						spi_values.displacement_myo_brick_err <= myo_control_interface.child.displacements_myo_brick_err_f[j];
-						spi_values.position_res <= myo_control_interface.child.positions_res_f[j];
-						spi_values.velocity_res <= myo_control_interface.child.velocities_res_f[j];
-						spi_values.displacement_res <= myo_control_interface.child.displacements_res_f[j];
-						spi_values.displacement_myo_brick_res <= myo_control_interface.child.displacements_myo_brick_res_f[j];
-						spi_values.actual_update_frequency <= myo_control_interface.child.actual_update_frequency[j];
+//						myo_control_interface.child.Kp_f[j] <= spi_values.Kp_f;
+//						myo_control_interface.child.Ki_f[j] <= spi_values.Ki_f;
+//						myo_control_interface.child.Kd_f[j] <= spi_values.Kd_f;
+//						myo_control_interface.child.sp_f[j] <= spi_values.sp_f;
+//						myo_control_interface.child.outputLimit[j] <= spi_values.outputLimit;
+//						myo_control_interface.child.control_mode[j] <= spi_values.control_mode;
+//						myo_control_interface.child.controlFlags[j] <= spi_values.controlFlags;
+//						myo_control_interface.child.update_frequency[j] <= spi_values.update_frequency;
+//						myo_control_interface.child.pos_encoder_multiplier_f[j] <= spi_values.pos_encoder_multiplier_f;
+//						myo_control_interface.child.dis_encoder_multiplier_f[j] <= spi_values.dis_encoder_multiplier_f;
+//						spi_values.pwmRef <= myo_control_interface.child.pwmRefs[j];
+//						spi_values.position <= myo_control_interface.child.positions[j];
+//						spi_values.velocity <= myo_control_interface.child.velocities[j];
+//						spi_values.current <= myo_control_interface.child.currents[j];
+//						spi_values.displacement <= myo_control_interface.child.displacements[j];
+//						spi_values.position_raw_f <= myo_control_interface.child.positions_raw_f[j];
+//						spi_values.velocity_raw_f <= myo_control_interface.child.velocities_raw_f[j];
+//						spi_values.displacement_raw_f <= myo_control_interface.child.displacements_raw_f[j];
+//						spi_values.position_conv_f <= myo_control_interface.child.positions_conv_f[j];
+//						spi_values.velocity_conv_f <= myo_control_interface.child.velocities_conv_f[j];
+//						spi_values.displacemen_conv_f <= myo_control_interface.child.displacements_conv_f[j];
+//						spi_values.displacement_myo_brick_conv_f <= myo_control_interface.child.displacements_myo_brick_conv_f[j];
+//						spi_values.position_err <= myo_control_interface.child.positions_err_f[j];
+//						spi_values.velocity_err <= myo_control_interface.child.velocities_err_f[j];
+//						spi_values.displacement_err <= myo_control_interface.child.displacements_err_f[j];
+//						spi_values.displacement_myo_brick_err <= myo_control_interface.child.displacements_myo_brick_err_f[j];
+//						spi_values.position_res <= myo_control_interface.child.positions_res_f[j];
+//						spi_values.velocity_res <= myo_control_interface.child.velocities_res_f[j];
+//						spi_values.displacement_res <= myo_control_interface.child.displacements_res_f[j];
+//						spi_values.displacement_myo_brick_res <= myo_control_interface.child.displacements_myo_brick_res_f[j];
+//						spi_values.actual_update_frequency <= myo_control_interface.child.actual_update_frequency[j];
 					end
 				end
 				state <= IDLE;
@@ -325,9 +338,7 @@ SYSTEM_PLL PLL_inst(
   .c0(wCLK24),
   .c1(wCLK120),
   .c2(wMEM_CLK),
-   .c3(oSDRAM_CLK),
-  .c4(wFLASH_CLK),
-   
+  .c3(oSDRAM_CLK),
   .locked());
 
 

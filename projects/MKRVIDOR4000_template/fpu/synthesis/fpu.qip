@@ -1,0 +1,42 @@
+set_global_assignment -entity "fpu" -library "fpu" -name IP_TOOL_NAME "Qsys"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_TOOL_VERSION "18.0"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -library "fpu" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../fpu.sopcinfo"]
+set_global_assignment -entity "fpu" -library "fpu" -name SLD_INFO "QSYS_NAME fpu HAS_SOPCINFO 1 GENERATION_ID 1565571625"
+set_global_assignment -library "fpu" -name MISC_FILE [file join $::quartus(qip_path) "../fpu.cmp"]
+set_global_assignment -library "fpu" -name SLD_FILE [file join $::quartus(qip_path) "fpu.debuginfo"]
+set_global_assignment -entity "fpu" -library "fpu" -name IP_TARGETED_DEVICE_FAMILY "Cyclone 10 LP"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_GENERATED_DEVICE_FAMILY "{Cyclone 10 LP}"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_QSYS_MODE "STANDALONE"
+set_global_assignment -name SYNTHESIS_ONLY_QIP ON
+set_global_assignment -library "fpu" -name MISC_FILE [file join $::quartus(qip_path) "../../fpu.qsys"]
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_NAME "ZnB1"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_DISPLAY_NAME "ZnB1"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_REPORT_HIERARCHY "On"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_INTERNAL "Off"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_VERSION "MS4w"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTU2NTU3MTYyNQ==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::Q3ljbG9uZSAxMCBMUA==::QXV0byBERVZJQ0VfRkFNSUxZ"
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::MTBDTDAxNllVMjU2QzhH::QXV0byBERVZJQ0U="
+set_global_assignment -entity "fpu" -library "fpu" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::OA==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_NAME "ZnBvaW50Ml9jb21iaQ=="
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_DISPLAY_NAME "RmxvYXRpbmcgUG9pbnQgSGFyZHdhcmUgMiBDb21iaW5hdG9yaWFs"
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_REPORT_HIERARCHY "Off"
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_INTERNAL "Off"
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_AUTHOR "QWx0ZXJhIENvcnBvcmF0aW9u"
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_VERSION "MTguMA=="
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_DESCRIPTION "VGhpcyBjb21wb25lbnQgcmVwcmVzZW50cyBwYXJ0IG9mIHRoZSBGbG9hdGluZyBQb2ludCBIYXJkd2FyZSAyIHdoZXJlIHRoZSBBcml0aG1ldGljIGFuZCBDb21wYXJpc29uIG9wZXJhdGlvbnMgYXJlIHBlcmZvcm1lZA=="
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_PARAMETER "YXJpdGhtZXRpY19wcmVzZW50::MQ==::YXJpdGhtZXRpYw=="
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_PARAMETER "Y29tcGFyaXNvbl9wcmVzZW50::MQ==::Y29tcGFyaXNvbg=="
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_COMPONENT_PARAMETER "ZGV2aWNlRmFtaWx5::Q3ljbG9uZSAxMCBMUA==::ZGV2aWNlRmFtaWx5"
+
+set_global_assignment -library "fpu" -name VERILOG_FILE [file join $::quartus(qip_path) "fpu.v"]
+set_global_assignment -library "fpu" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/fpoint2_combi.vhd"]
+set_global_assignment -library "fpu" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/FPMinMaxFused/FPMinMaxFused.vhd"]
+set_global_assignment -library "fpu" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/FPCompareFused/FPCompareFused.vhd"]
+set_global_assignment -library "fpu" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/FPNeg_Abs/FPNeg.vhd"]
+set_global_assignment -library "fpu" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/FPNeg_Abs/FPAbs.vhd"]
+
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_TOOL_NAME "altera_nios_custom_instr_floating_point_2_combi"
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_TOOL_VERSION "18.0"
+set_global_assignment -entity "fpoint2_combi" -library "fpu" -name IP_TOOL_ENV "Qsys"
