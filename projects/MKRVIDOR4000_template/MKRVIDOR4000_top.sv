@@ -25,7 +25,7 @@ module MKRVIDOR4000_top
   input         iRESETn,
   input         iSAM_INT,
   output        oSAM_INT,
-  
+   
   // SDRAM
   output        oSDRAM_CLK,
   output [11:0] oSDRAM_ADDR,
@@ -122,10 +122,10 @@ module MKRVIDOR4000_top
 assign bMKR_D[5:0] = PHASES;
 reg [5:0] PHASES;
 reg [10:0] pwm_delay;
-reg [10:0] pwm;
+reg signed [31:0] pwm;
 
 always @(posedge wCLK24) begin: BLDC_COMMUTATION
-	if(pwm_delay>(2047-pwm))begin
+	if( pwm>=0 && pwm_delay>(2047-pwm))begin
 		if(bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6]) begin
 			PHASES <= 6'b100100;
 		end 
@@ -136,13 +136,32 @@ always @(posedge wCLK24) begin: BLDC_COMMUTATION
 			PHASES <= 6'b001001;
 		end 
 		if(~bMKR_A[4] && bMKR_A[5] && ~bMKR_A[6])begin
-			PHASES <= 6'b011000;
+			PHASES <= 6'b011000; 
 		end 
 		if(~bMKR_A[4] && bMKR_A[5] && bMKR_A[6]) begin
 			PHASES <= 6'b010010;
 		end 	
 		if(~bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6])begin
 			PHASES <= 6'b000110;
+		end 
+	end else if ( pwm<0 && pwm_delay>(2047+pwm)) begin
+		if(bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6]) begin
+			PHASES <= 6'b011000;
+		end 
+		if(bMKR_A[4] && ~bMKR_A[5] && ~bMKR_A[6])begin
+			PHASES <= 6'b010010;
+		end 
+		if(bMKR_A[4] && bMKR_A[5] && ~bMKR_A[6]) begin
+			PHASES <= 6'b000110;
+		end 
+		if(~bMKR_A[4] && bMKR_A[5] && ~bMKR_A[6])begin
+			PHASES <= 6'b100100; 
+		end 
+		if(~bMKR_A[4] && bMKR_A[5] && bMKR_A[6]) begin
+			PHASES <= 6'b100001;
+		end 	
+		if(~bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6])begin
+			PHASES <= 6'b001001;
 		end 
 	end else begin
 		PHASES <= 0;
@@ -151,29 +170,31 @@ always @(posedge wCLK24) begin: BLDC_COMMUTATION
 end
 
 wire encoder_A, encoder_B, encoder_A_rising_edge, encoder_B_rising_edge;
-assign encoder_A = bMKR_A[3];
-assign encoder_B = bMKR_A[2];
-assign encoder_A_rising_edge = (bMKR_A[3] && !encoder_A_prev);
-assign encoder_B_rising_edge = (bMKR_A[2] && !encoder_B_prev);
+assign encoder_A = bMKR_A[0];
+assign encoder_B = bMKR_A[1];
+assign encoder_A_rising_edge = (bMKR_A[0] && !encoder_A_prev);
+assign encoder_B_rising_edge = (bMKR_A[1] && !encoder_B_prev);
 
 reg encoder_A_prev, encoder_B_prev;
 
 wire signed [31:0] position;
 
-rot_enc_flt encoder_0(wCLK24, 0, 0, bMKR_A[3], bMKR_A[2], position);
+rot_enc_flt encoder_0(wCLK24, 0, 0, bMKR_A[1], bMKR_A[0], position);
 
-//always @(posedge bMKR_A[3]) begin: OPTICAL_ENCODER
-//	position <= position +1;
-////	if(encoder_0_B_prev==1 && encoder_0_A_prev==0 && encoder_0_A) begin
-////		position <= position +1;
-////	end
+//always @(posedge wCLK24) begin: OPTICAL_ENCODER
+////	position <= position +1;
+//	encoder_A_prev <= bMKR_A[0];
+//	encoder_B_prev <= bMKR_A[1];
+//	if( encoder_A==1 && encoder_B_prev==0 && encoder_B==1) begin
+//		position <= position +1;
+//	end
 ////	if(encoder_0_A_prev && encoder_0_B_prev && ~encoder_0_B) begin
 ////		position <= position +1;
 ////	end
 ////	if(encoder_0_A_prev && ~encoder_0_A && ~encoder_0_B) begin
 ////		position <= position +1;
 ////	end
-//	
+////	
 ////	if(encoder_0_B_prev && ~encoder_0_B && encoder_0_A) begin
 ////		position <= position -1;
 ////	end
