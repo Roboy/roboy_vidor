@@ -101,7 +101,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_
 set_global_assignment -name VHDL_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/spi_master_slave/trunk/rtl/spi_master_slave/spi_slave.vhd
 set_global_assignment -name QIP_FILE ../../ip/SYSTEM_PLL/SYSTEM_PLL.qip
 set_global_assignment -name VHDL_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/spi_master_slave/trunk/rtl/spi_master_slave/spi_master.vhd
-set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/A1335Control.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/SpiControl.v
 set_global_assignment -name SDC_FILE ../../constraints/MKRVIDOR4000/vidor_s.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/interfaces/MyoControlInterface.sv

@@ -121,11 +121,11 @@ module MKRVIDOR4000_top
 
 assign bMKR_D[5:0] = PHASES;
 reg [5:0] PHASES;
-reg [10:0] pwm_delay;
+reg [9:0] pwm_delay;
 reg signed [31:0] pwm;
 
 always @(posedge wCLK24) begin: BLDC_COMMUTATION
-	if( pwm>=0 && pwm_delay>(2047-pwm))begin
+	if( pwm>=0 && pwm_delay>(1023-pwm))begin
 		if(bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6]) begin
 			PHASES <= 6'b100100;
 		end 
@@ -144,7 +144,7 @@ always @(posedge wCLK24) begin: BLDC_COMMUTATION
 		if(~bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6])begin
 			PHASES <= 6'b000110;
 		end 
-	end else if ( pwm<0 && pwm_delay>(2047+pwm)) begin
+	end else if ( pwm<0 && pwm_delay>(1023+pwm)) begin
 		if(bMKR_A[4] && ~bMKR_A[5] && bMKR_A[6]) begin
 			PHASES <= 6'b011000;
 		end 
@@ -178,8 +178,49 @@ assign encoder_B_rising_edge = (bMKR_A[1] && !encoder_B_prev);
 reg encoder_A_prev, encoder_B_prev;
 
 wire signed [31:0] position;
+reg signed [31:0] setpoint;
+reg signed [31:0] position_prev;
+reg signed [31:0] velocity;
+reg signed [31:0] displacement;
+reg signed [31:0] current;
+reg [7:0] control_mode;
+reg update_controller;
 
-rot_enc_flt encoder_0(wCLK24, 0, 0, bMKR_A[1], bMKR_A[0], position);
+always @(posedge wCLK24) begin: PID_CONTROLLER_PID_CONTROLLERLOGIC
+	reg signed [31:0] integral;
+	reg signed [31:0] lastError;
+	reg signed [31:0] err;
+	reg signed [31:0] pterm;
+	reg signed [31:0] dterm;
+	reg signed [31:0] ffterm;
+	reg signed [31:0] displacement_offset;
+	reg update_controller_prev;
+	reg signed [31:0] result;
+	localparam integer outputNegMax = -1023;
+	localparam integer outputPosMax = 1023;
+	localparam integer Kp = 1;
+	localparam integer Kd = 0;
+	
+	case(control_mode) 
+		0: err <= (setpoint - position); 
+		1: err <= (setpoint - velocity);
+		2: err <= (setpoint - displacement);
+		default: err <= 0;
+	endcase;
+	pterm <= (Kp * err);
+	dterm <= ((err - lastError) * Kd);
+	result <= (pterm + dterm)>>>7;
+	lastError <= err;
+	// limit output
+	if ((result < outputNegMax)) begin
+		 result <= outputNegMax;
+	end else if ((result > outputPosMax)) begin
+		 result <= outputPosMax;
+	end
+	pwm <= result;
+end
+
+rot_enc_flt encoder_0(wCLK120, 0, 0, bMKR_A[1], bMKR_A[0], position);
 
 //always @(posedge wCLK24) begin: OPTICAL_ENCODER
 ////	position <= position +1;
@@ -212,8 +253,8 @@ rot_enc_flt encoder_0(wCLK24, 0, 0, bMKR_A[1], bMKR_A[0], position);
 wire [7:0] data_out;
 wire [7:0] data_in;
 assign data_in = fpga_to_samd[byte_counter];
-reg [7:0] samd_to_fpga[19:0];
-reg [7:0] fpga_to_samd[19:0];
+reg [7:0] samd_to_fpga[24:0];
+reg [7:0] fpga_to_samd[24:0];
 wire data_out_valid;
 reg data_out_valid_prev;
 reg write;
@@ -234,17 +275,26 @@ reg [31:0] byte_counter;
 
 localparam IDLE = 0, WAIT_FOR_FRAME_TRANSMISSION = 1;
 reg [7:0] state = IDLE;
+reg signed [31:0] counter;
 integer j;
 
 always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 	data_out_valid_prev <= data_out_valid;
+	counter <= counter+1;
 	write <= 0;
+	update_controller<=0;
 	case(state) 
 		IDLE: begin
 			byte_counter <= 0;
 			if(bMKR_D[6]==0) begin
 				state=WAIT_FOR_FRAME_TRANSMISSION;
+				position_prev <= position;
+				if(counter!=0) begin
+					velocity <= (position-position_prev)/counter;
+				end
+				counter <= 0;
 				write <= 1;
+				update_controller<=1;
 			end
 		end
 		WAIT_FOR_FRAME_TRANSMISSION: begin
@@ -258,11 +308,28 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 					write <= 1;
 				end
 			end else begin // receiving done
-				pwm <= {samd_to_fpga[3],samd_to_fpga[2],samd_to_fpga[1],samd_to_fpga[0]};
+				setpoint <= {samd_to_fpga[3],samd_to_fpga[2],samd_to_fpga[1],samd_to_fpga[0]};
 				fpga_to_samd[4] <= position[7:0];
 				fpga_to_samd[5] <= position[15:8];
 				fpga_to_samd[6] <= position[23:16];
 				fpga_to_samd[7] <= position[31:24];
+				fpga_to_samd[8] <= velocity[7:0];
+				fpga_to_samd[9] <= velocity[15:8];
+				fpga_to_samd[10] <= velocity[23:16];
+				fpga_to_samd[11] <= velocity[31:24];
+				fpga_to_samd[12] <= displacement[7:0];
+				fpga_to_samd[13] <= displacement[15:8];
+				fpga_to_samd[14] <= displacement[23:16];
+				fpga_to_samd[15] <= displacement[31:24];
+				fpga_to_samd[16] <= current[7:0];
+				fpga_to_samd[17] <= current[15:8];
+				fpga_to_samd[18] <= current[23:16];
+				fpga_to_samd[19] <= current[31:24];
+				fpga_to_samd[20] <= pwm[7:0];
+				fpga_to_samd[21] <= pwm[15:8];
+				fpga_to_samd[22] <= pwm[23:16];
+				fpga_to_samd[23] <= pwm[31:24];
+				control_mode <= samd_to_fpga[24];
 				state <= IDLE;
 			end 
 		end
