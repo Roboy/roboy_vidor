@@ -107,4 +107,5 @@ set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to bMKR_A[4]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to bMKR_A[5]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to bMKR_A[6]
+set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/tli4970/TLI4970SpiControl.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
