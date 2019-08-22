@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 29 0
+LIBS:roboy_2.0_forarm_shield-cache
+EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -14,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L custom:2041119-1-vidor J3
+L roboy_2.0_forarm_shield-rescue:2041119-1-vidor-custom J3
 U 1 1 5D4F1993
 P 7950 2000
 F 0 "J3" H 7950 3267 50  0000 C CNN
@@ -1544,7 +1545,7 @@ Connection ~ 6600 6500
 Wire Wire Line
 	6600 6500 6400 6500
 $Comp
-L custom:Simic_Infineon U1
+L roboy_2.0_forarm_shield-rescue:Simic_Infineon-custom U1
 U 1 1 5D688AA1
 P 5500 2700
 F 0 "U1" H 5500 3175 50  0000 C CNN
