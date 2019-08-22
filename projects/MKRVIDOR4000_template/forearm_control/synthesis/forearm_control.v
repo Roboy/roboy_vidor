@@ -11,17 +11,17 @@ module forearm_control (
 		input  wire        myocontrol_0_avalon_slave_0_read,              //                            .read
 		output wire [31:0] myocontrol_0_avalon_slave_0_readdata,          //                            .readdata
 		output wire        myocontrol_0_avalon_slave_0_waitrequest,       //                            .waitrequest
-		input  wire        myocontrol_0_conduit_end_miso,                 //    myocontrol_0_conduit_end.miso
-		output wire        myocontrol_0_conduit_end_mosi,                 //                            .mosi
-		output wire        myocontrol_0_conduit_end_sck,                  //                            .sck
-		output wire [2:0]  myocontrol_0_conduit_end_ss_n,                 //                            .ss_n
-		input  wire        myocontrol_0_conduit_end_mirrored_muscle_unit, //                            .mirrored_muscle_unit
-		input  wire        myocontrol_0_conduit_end_power_sense_n,        //                            .power_sense_n
-		output wire        myocontrol_0_conduit_end_gpio_n,               //                            .gpio_n
-		input  wire        myocontrol_0_conduit_end_angle_miso,           //                            .angle_miso
+		input  wire        myocontrol_0_conduit_end_angle_miso,           //    myocontrol_0_conduit_end.angle_miso
 		output wire        myocontrol_0_conduit_end_angle_mosi,           //                            .angle_mosi
 		output wire        myocontrol_0_conduit_end_angle_sck,            //                            .angle_sck
 		output wire [2:0]  myocontrol_0_conduit_end_angle_ss_n_o,         //                            .angle_ss_n_o
+		output wire        myocontrol_0_conduit_end_gpio_n,               //                            .gpio_n
+		input  wire        myocontrol_0_conduit_end_mirrored_muscle_unit, //                            .mirrored_muscle_unit
+		input  wire        myocontrol_0_conduit_end_miso,                 //                            .miso
+		output wire        myocontrol_0_conduit_end_mosi,                 //                            .mosi
+		input  wire        myocontrol_0_conduit_end_power_sense_n,        //                            .power_sense_n
+		output wire [2:0]  myocontrol_0_conduit_end_ss_n_o,               //                            .ss_n_o
+		output wire        myocontrol_0_conduit_end_sck,                  //                            .sck
 		input  wire        reset_reset_n                                  //                       reset.reset_n
 	);
 
@@ -39,17 +39,17 @@ module forearm_control (
 		.read                 (myocontrol_0_avalon_slave_0_read),              //               .read
 		.readdata             (myocontrol_0_avalon_slave_0_readdata),          //               .readdata
 		.waitrequest          (myocontrol_0_avalon_slave_0_waitrequest),       //               .waitrequest
-		.miso                 (myocontrol_0_conduit_end_miso),                 //    conduit_end.miso
-		.mosi                 (myocontrol_0_conduit_end_mosi),                 //               .mosi
-		.sck                  (myocontrol_0_conduit_end_sck),                  //               .sck
-		.ss_n_o               (myocontrol_0_conduit_end_ss_n),                 //               .ss_n
-		.mirrored_muscle_unit (myocontrol_0_conduit_end_mirrored_muscle_unit), //               .mirrored_muscle_unit
-		.power_sense_n        (myocontrol_0_conduit_end_power_sense_n),        //               .power_sense_n
-		.gpio_n               (myocontrol_0_conduit_end_gpio_n),               //               .gpio_n
-		.angle_miso           (myocontrol_0_conduit_end_angle_miso),           //               .angle_miso
+		.angle_miso           (myocontrol_0_conduit_end_angle_miso),           //    conduit_end.angle_miso
 		.angle_mosi           (myocontrol_0_conduit_end_angle_mosi),           //               .angle_mosi
 		.angle_sck            (myocontrol_0_conduit_end_angle_sck),            //               .angle_sck
 		.angle_ss_n_o         (myocontrol_0_conduit_end_angle_ss_n_o),         //               .angle_ss_n_o
+		.gpio_n               (myocontrol_0_conduit_end_gpio_n),               //               .gpio_n
+		.mirrored_muscle_unit (myocontrol_0_conduit_end_mirrored_muscle_unit), //               .mirrored_muscle_unit
+		.miso                 (myocontrol_0_conduit_end_miso),                 //               .miso
+		.mosi                 (myocontrol_0_conduit_end_mosi),                 //               .mosi
+		.power_sense_n        (myocontrol_0_conduit_end_power_sense_n),        //               .power_sense_n
+		.ss_n_o               (myocontrol_0_conduit_end_ss_n_o),               //               .ss_n_o
+		.sck                  (myocontrol_0_conduit_end_sck),                  //               .sck
 		.clock                (clk_clk)                                        //     clock_sink.clk
 	);
 

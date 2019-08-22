@@ -89,11 +89,11 @@ set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
 
 
 set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name SYSTEMVERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/MYOControl.sv
 set_global_assignment -name VHDL_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/spi_master_slave/trunk/rtl/spi_master_slave/spi_slave.vhd
 set_global_assignment -name QIP_FILE ../../ip/SYSTEM_PLL/SYSTEM_PLL.qip
 set_global_assignment -name VHDL_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/spi_master_slave/trunk/rtl/spi_master_slave/spi_master.vhd
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/PIDController.v
-set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/MYOControl.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/A1335Control.v
 set_global_assignment -name VERILOG_FILE ../../roboy_fpga_code/roboy_fpga_code/myo_control/SpiControl.v
 set_global_assignment -name QIP_FILE forearm_control/synthesis/forearm_control.qip

@@ -121,6 +121,11 @@ module MKRVIDOR4000_top
 
 parameter NUMBER_OF_MOTORS = 4;
 
+assign bPEX_PIN45 = bMKR_D[11]; // servo_pwm // T15
+assign bPEX_PIN46 = bMKR_D[12]; // dc_direction // R14
+assign bPEX_PIN44 = bMKR_D[13]; // dc_enable // P14
+assign bPEX_PIN42 = bMKR_D[14]; // thumb_lock // R13
+
 reg [15:0] avalon_address;
 reg        avalon_write;
 reg [31:0] avalon_writedata;
@@ -130,10 +135,10 @@ wire 		  avalon_waitrequest;
 
 forearm_control (
 		.clk_clk(iCLK),                                       //                      clk.clk
-		.myocontrol_0_conduit_end_miso(bMKR_D[1]),                 // myocontrol_0_conduit_end.miso
-		.myocontrol_0_conduit_end_mosi(bMKR_D[0]),                 //                         .mosi
+		.myocontrol_0_conduit_end_miso(bMKR_D[0]),                 // myocontrol_0_conduit_end.miso
+		.myocontrol_0_conduit_end_mosi(bMKR_D[1]),                 //                         .mosi
 		.myocontrol_0_conduit_end_sck(bMKR_D[2]),                  //                         .sck
-		.myocontrol_0_conduit_end_ss_n(bMKR_D[5:3]),                 //                         .ss_n
+		.myocontrol_0_conduit_end_ss_n_o(bMKR_D[6:3]),                 //                         .ss_n
 		.myocontrol_0_conduit_end_power_sense_n(1'b0),        //                         .power_sense_n
 		.reset_reset_n(1'b1),      
 		.myocontrol_0_avalon_slave_0_address(avalon_address),           // myocontrol_0_avalon_slave_0.address
@@ -327,7 +332,7 @@ always @(posedge iCLK) begin: SPICONTROL_SPILOGIC
 				43: avalon_writedata <= samd_to_fpga[81][5:4];
 				44: avalon_writedata <= samd_to_fpga[81][3:2];
 				45: avalon_writedata <= samd_to_fpga[81][1:0];
-				// outputDivider
+				// outputShifter
 				46: avalon_writedata <= samd_to_fpga[82];
 				47: avalon_writedata <= samd_to_fpga[83];
 				48: avalon_writedata <= samd_to_fpga[84];
