@@ -2,4 +2,5 @@
   (lib (name 2041119-1)(type Legacy)(uri ${KIPRJMOD}/kicad_db/lib/2041119-1.lib)(options "")(descr ""))
   (lib (name AON7804)(type Legacy)(uri ${KIPRJMOD}/kicad_db/lib/AON7804.lib)(options "")(descr ""))
   (lib (name custom)(type Legacy)(uri ${KIPRJMOD}/kicad_db/lib/custom.lib)(options "")(descr ""))
+  (lib (name roboy_2.0_forarm_shield-rescue)(type Legacy)(uri ${KIPRJMOD}/roboy_2.0_forarm_shield-rescue.lib)(options "")(descr ""))
 )

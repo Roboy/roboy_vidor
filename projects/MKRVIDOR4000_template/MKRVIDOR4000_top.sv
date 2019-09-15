@@ -169,14 +169,6 @@ always @(posedge wCLK24) begin: BLDC_COMMUTATION
 	pwm_delay <= pwm_delay+1;
 end
 
-wire encoder_A, encoder_B, encoder_A_rising_edge, encoder_B_rising_edge;
-assign encoder_A = bMKR_A[0];
-assign encoder_B = bMKR_A[1];
-assign encoder_A_rising_edge = (bMKR_A[0] && !encoder_A_prev);
-assign encoder_B_rising_edge = (bMKR_A[1] && !encoder_B_prev);
-
-reg encoder_A_prev, encoder_B_prev;
-
 wire signed [31:0] position;
 reg signed [31:0] setpoint;
 reg signed [31:0] position_prev;
@@ -192,7 +184,6 @@ always @(posedge wCLK24) begin: PID_CONTROLLER_PID_CONTROLLERLOGIC
 	reg signed [31:0] err;
 	reg signed [31:0] pterm;
 	reg signed [31:0] dterm;
-	reg signed [31:0] ffterm;
 	reg signed [31:0] displacement_offset;
 	reg update_controller_prev;
 	reg signed [31:0] result;
@@ -205,50 +196,24 @@ always @(posedge wCLK24) begin: PID_CONTROLLER_PID_CONTROLLERLOGIC
 		0: err <= (setpoint - position); 
 		1: err <= (setpoint - velocity);
 		2: err <= (setpoint - displacement);
-		default: err <= 0;
+		default: pwm <= setpoint;
 	endcase;
-	pterm <= (Kp * err);
-	dterm <= ((err - lastError) * Kd);
-	result <= (pterm + dterm)>>>7;
-	lastError <= err;
-	// limit output
-	if ((result < outputNegMax)) begin
-		 result <= outputNegMax;
-	end else if ((result > outputPosMax)) begin
-		 result <= outputPosMax;
+	if(control_mode<3) begin
+		pterm <= (Kp * err);
+		dterm <= ((err - lastError) * Kd);
+		result <= (pterm + dterm)>>>7;
+		lastError <= err;
+		// limit output
+		if ((result < outputNegMax)) begin
+			 result <= outputNegMax;
+		end else if ((result > outputPosMax)) begin
+			 result <= outputPosMax;
+		end
+		pwm <= result;
 	end
-	pwm <= result;
 end
 
 rot_enc_flt encoder_0(wCLK120, 0, 0, bMKR_A[1], bMKR_A[0], position);
-
-//always @(posedge wCLK24) begin: OPTICAL_ENCODER
-////	position <= position +1;
-//	encoder_A_prev <= bMKR_A[0];
-//	encoder_B_prev <= bMKR_A[1];
-//	if( encoder_A==1 && encoder_B_prev==0 && encoder_B==1) begin
-//		position <= position +1;
-//	end
-////	if(encoder_0_A_prev && encoder_0_B_prev && ~encoder_0_B) begin
-////		position <= position +1;
-////	end
-////	if(encoder_0_A_prev && ~encoder_0_A && ~encoder_0_B) begin
-////		position <= position +1;
-////	end
-////	
-////	if(encoder_0_B_prev && ~encoder_0_B && encoder_0_A) begin
-////		position <= position -1;
-////	end
-////	if(~encoder_0_B_prev && encoder_0_A_prev && ~encoder_0_A) begin
-////		position <= position -1;
-////	end
-////	if(~encoder_0_A_prev && ~encoder_0_B_prev && encoder_0_B) begin
-////		position <= position -1;
-////	end
-////	if(~encoder_0_A_prev && encoder_0_A && encoder_0_B) begin
-////		position <= position -1;
-////	end
-//end
 
 wire [7:0] data_out;
 wire [7:0] data_in;
@@ -283,6 +248,7 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 	counter <= counter+1;
 	write <= 0;
 	update_controller<=0;
+//	start_spi_transmission<=0;
 	case(state) 
 		IDLE: begin
 			byte_counter <= 0;
@@ -306,9 +272,14 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 					end
 					byte_counter <= byte_counter+1;
 					write <= 1;
+//					start_spi_transmission<= 1;
 				end
 			end else begin // receiving done
 				setpoint <= {samd_to_fpga[3],samd_to_fpga[2],samd_to_fpga[1],samd_to_fpga[0]};
+				fpga_to_samd[0] <= setpoint[7:0];
+				fpga_to_samd[1] <= setpoint[15:8];
+				fpga_to_samd[2] <= setpoint[23:16];
+				fpga_to_samd[3] <= setpoint[31:24];
 				fpga_to_samd[4] <= position[7:0];
 				fpga_to_samd[5] <= position[15:8];
 				fpga_to_samd[6] <= position[23:16];
@@ -329,6 +300,7 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 				fpga_to_samd[21] <= pwm[15:8];
 				fpga_to_samd[22] <= pwm[23:16];
 				fpga_to_samd[23] <= pwm[31:24];
+				fpga_to_samd[24] <= control_mode;
 				control_mode <= samd_to_fpga[24];
 				state <= IDLE;
 			end 
@@ -336,11 +308,45 @@ always @(posedge wCLK24) begin: SPICONTROL_SPILOGIC
 	endcase 
 end
  
+//wire di_req, wr_ack, do_valid, wren, spi_done;
+//wire [15:0] current_sensor_data_out;
+//wire signed [15:0] current;
+//reg start_spi_transmission;
+//
+//// control logic for handling myocontrol frame
+//TLI4970SpiControl spi_control(
+//	.clock(clock),
+//	.reset(1'b0),
+//	.di_req(di_req),
+//	.write_ack(wr_ack),
+//	.data_read_valid(do_valid),
+//	.data_read(current_sensor_data_out[15:0]),
+//	.start(start_spi_transmission),
+//	.wren(wren),
+//	.spi_done(spi_done),
+//	.current(current),
+//	.ss_n(bMKR_A[2])
+//);
+//
+//// SPI specs: 2MHz, 16bit MSB, clock phase of 1
+//spi_master #(16, 1'b0, 1'b1, 2, 6) spi(
+//	.sclk_i(wCLK24),
+//	.pclk_i(wCLK24),
+//	.rst_i(1'b0),
+//	.spi_miso_i(miso),
+//	.di_i(16'hFFFF),
+//	.wren_i(wren),
+//	.spi_ssel_o(ss_n),
+//	.spi_sck_o(sck),
+//	.spi_mosi_o(mosi),
+//	.di_req_o(di_req),
+//	.wr_ack_o(wr_ack),
+//	.do_valid_o(do_valid),
+//	.do_o(current_sensor_data_out[15:0])
+//);
  
 // signal declaration
-
 wire        wOSC_CLK;
-
 wire        wCLK8,wCLK24, wCLK64, wCLK120;
 
 wire [31:0] wJTAG_ADDRESS, wJTAG_READ_DATA, wJTAG_WRITE_DATA, wDPRAM_READ_DATA;

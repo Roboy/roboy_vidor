@@ -254,11 +254,70 @@ X VDD 4 0 300 100 D 50 50 1 1 W
 ENDDRAW
 ENDDEF
 #
-# custom_2041119-1-vidor
+# power_+1V5
 #
-DEF custom_2041119-1-vidor J 0 40 Y Y 1 L N
+DEF power_+1V5 #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -150 50 H I C CNN
+F1 "power_+1V5" 0 140 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 2 0 1 0 -30 50 0 100 N
+P 2 0 1 0 0 0 0 100 N
+P 2 0 1 0 0 100 30 50 N
+X +1V5 1 0 0 0 U 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# power_+3.3V
+#
+DEF power_+3.3V #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -150 50 H I C CNN
+F1 "power_+3.3V" 0 140 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+ALIAS +3.3V
+DRAW
+P 2 0 1 0 -30 50 0 100 N
+P 2 0 1 0 0 0 0 100 N
+P 2 0 1 0 0 100 30 50 N
+X +3V3 1 0 0 0 U 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# power_+5V
+#
+DEF power_+5V #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -150 50 H I C CNN
+F1 "power_+5V" 0 140 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 2 0 1 0 -30 50 0 100 N
+P 2 0 1 0 0 0 0 100 N
+P 2 0 1 0 0 100 30 50 N
+X +5V 1 0 0 0 U 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# power_GND
+#
+DEF power_GND #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -250 50 H I C CNN
+F1 "power_GND" 0 -150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 6 0 1 0 0 0 0 -50 50 -50 0 -100 -50 -50 0 -50 N
+X GND 1 0 0 0 D 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# roboy_2.0_forarm_shield-rescue_2041119-1-vidor-custom
+#
+DEF roboy_2.0_forarm_shield-rescue_2041119-1-vidor-custom J 0 40 Y Y 1 L N
 F0 "J" -710 1131 50 H V L BNN
-F1 "custom_2041119-1-vidor" -701 -1101 50 H V L BNN
+F1 "roboy_2.0_forarm_shield-rescue_2041119-1-vidor-custom" -701 -1101 50 H V L BNN
 F2 "TE_2041119-1" 0 0 50 H I L BNN
 F3 "TE Connectivity" 0 0 50 H I L BNN
 F4 "None" 0 0 50 H I L BNN
@@ -335,11 +394,11 @@ X SHIELD S4 900 -800 200 L 40 40 0 0 W
 ENDDRAW
 ENDDEF
 #
-# custom_Simic_Infineon
+# roboy_2.0_forarm_shield-rescue_Simic_Infineon-custom
 #
-DEF custom_Simic_Infineon U 0 40 Y Y 1 F N
+DEF roboy_2.0_forarm_shield-rescue_Simic_Infineon-custom U 0 40 Y Y 1 F N
 F0 "U" 0 450 50 H V C CNN
-F1 "custom_Simic_Infineon" 0 350 50 H V C CNN
+F1 "roboy_2.0_forarm_shield-rescue_Simic_Infineon-custom" 0 350 50 H V C CNN
 F2 "" 0 0 50 H I C CNN
 F3 "" 0 0 50 H I C CNN
 DRAW
@@ -351,65 +410,6 @@ X VDD 2 -450 250 200 R 50 50 1 1 W
 X CLK 3 450 150 200 L 50 50 1 1 I
 X L/R 4 -450 150 200 R 50 50 1 1 I
 X GND 5 -200 -500 200 U 50 50 1 1 W
-ENDDRAW
-ENDDEF
-#
-# power_+1V5
-#
-DEF power_+1V5 #PWR 0 0 Y Y 1 F P
-F0 "#PWR" 0 -150 50 H I C CNN
-F1 "power_+1V5" 0 140 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-DRAW
-P 2 0 1 0 -30 50 0 100 N
-P 2 0 1 0 0 0 0 100 N
-P 2 0 1 0 0 100 30 50 N
-X +1V5 1 0 0 0 U 50 50 1 1 W N
-ENDDRAW
-ENDDEF
-#
-# power_+3.3V
-#
-DEF power_+3.3V #PWR 0 0 Y Y 1 F P
-F0 "#PWR" 0 -150 50 H I C CNN
-F1 "power_+3.3V" 0 140 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-ALIAS +3.3V
-DRAW
-P 2 0 1 0 -30 50 0 100 N
-P 2 0 1 0 0 0 0 100 N
-P 2 0 1 0 0 100 30 50 N
-X +3V3 1 0 0 0 U 50 50 1 1 W N
-ENDDRAW
-ENDDEF
-#
-# power_+5V
-#
-DEF power_+5V #PWR 0 0 Y Y 1 F P
-F0 "#PWR" 0 -150 50 H I C CNN
-F1 "power_+5V" 0 140 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-DRAW
-P 2 0 1 0 -30 50 0 100 N
-P 2 0 1 0 0 0 0 100 N
-P 2 0 1 0 0 100 30 50 N
-X +5V 1 0 0 0 U 50 50 1 1 W N
-ENDDRAW
-ENDDEF
-#
-# power_GND
-#
-DEF power_GND #PWR 0 0 Y Y 1 F P
-F0 "#PWR" 0 -250 50 H I C CNN
-F1 "power_GND" 0 -150 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-DRAW
-P 6 0 1 0 0 0 0 -50 50 -50 0 -100 -50 -50 0 -50 N
-X GND 1 0 0 0 D 50 50 1 1 W N
 ENDDRAW
 ENDDEF
 #
