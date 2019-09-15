@@ -7,6 +7,6 @@ BACK_PID=$!
 sleep 20
 read -r -p "Double-tap reset button quickly, then hit enter" response
 if [[ $response =~ ^()$ ]]; then
-	    ./tools/linux/bossac -i -d --port=/dev/$1 -I -U true -i -e -w -v RestoreFPGABootloader.ino.bin -R
+	    ./tools/linux/bossac -i -d --port=/dev/$1 -I -U true -i -e -w RestoreFPGABootloader.ino.bin -R
 fi
 echo "done"
